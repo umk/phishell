@@ -1,0 +1,39 @@
+{
+  "name": "execute_http_call",
+  "description": "Executes an HTTP call.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "url": {
+        "type": "string",
+        "format": "uri",
+        "description": "The URL to make the HTTP call to. May include query parameters."
+      },
+      "method": {
+        "type": "string",
+        "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"],
+        "description": "The HTTP method to use for the call."
+      },
+      "headers": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A key-value map of HTTP headers to include in the request."
+      },
+      "query_parameters": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        },
+        "description": "A key-value map of query parameters to append to the URL."
+      },
+      "body": {
+        "type": "string",
+        "description": "The body of the HTTP request. Encoded appropriately based on the Content-Type header."
+      }
+    },
+    "required": ["url", "method"],
+    "additionalProperties": false
+  }
+}

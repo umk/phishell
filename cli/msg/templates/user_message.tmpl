@@ -1,0 +1,19 @@
+{{ if or .Knowledge -}}
+Use the following expert-provided information as the primary basis for your response. If it conflicts with other information, prioritize the expert input.
+
+{{ .Knowledge }}
+
+---
+{{- end }}
+
+{{- range $context := .Context }}
+{{ $context }}
+
+---
+{{- end }}
+
+{{- if or .Knowledge (gt (len .Context) 0) }}
+User Request:
+
+{{ end -}}
+{{ .Request }}

@@ -1,0 +1,19 @@
+{
+  "name": "create_or_update_file",
+  "description": "Creates or updates a file at the given path with the specified content.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "The relative or absolute path to the file to create or update."
+      },
+      "file_content": {
+        "type": "string",
+        "description": "The content to write to the file."
+      }
+    },
+    "required": ["path", "file_content"],
+    "additionalProperties": false
+  }
+}

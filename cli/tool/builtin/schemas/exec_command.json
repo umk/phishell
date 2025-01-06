@@ -1,0 +1,19 @@
+{
+  "name": "execute_console_command",
+  "description": "Executes a non-interactive console command with its arguments.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "command_line": {
+        "type": "string",
+        "description": "A single console command to execute, including the command name within PATH and any arguments."
+      },
+      "working_dir": {
+        "type": "string",
+        "description": "An optional relative or absolute working directory to set for the command."
+      }
+    },
+    "required": ["command_line"],
+    "additionalProperties": false
+  }
+}

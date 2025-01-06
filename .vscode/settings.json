@@ -1,0 +1,11 @@
+{
+    "[gotmpl]": {
+        "editor.wordWrap": "on"
+    },
+    "[plaintext]": {
+        "editor.wordWrap": "on"
+    },
+    "[markdown]": {
+        "editor.wordWrap": "on"
+    }
+}

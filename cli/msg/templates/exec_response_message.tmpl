@@ -1,0 +1,14 @@
+{{- if or (ne .ExitCode 0) .Summary }}
+Exit Code: {{ .ExitCode }}
+
+{{- if .Output }}
+Output{{ if .Summary }} Summary{{ end }}:
+{{- end }}
+
+{{- end }}
+
+{{- if .Output }}
+{{- .Output }}
+{{- else }}
+The command returned an empty output.
+{{- end }}

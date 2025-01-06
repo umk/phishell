@@ -1,0 +1,19 @@
+{
+  "name": "delete_file_or_dir",
+  "description": "Delete a file or directory at the given path.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "The relative or absolute path to the file or directory to delete."
+      },
+      "recursive": {
+        "type": "boolean",
+        "description": "If the path is a directory, setting this to true will delete it recursively along with all its contents."
+      }
+    },
+    "required": ["path"],
+    "additionalProperties": false
+  }
+}

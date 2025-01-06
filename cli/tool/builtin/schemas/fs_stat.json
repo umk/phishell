@@ -1,0 +1,15 @@
+{
+  "name": "get_file_status",
+  "description": "Check if a file or directory exists, and retrieve its type, size, and access mode.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "The relative or absolute path to the file or directory whose status should be retrieved."
+      }
+    },
+    "required": ["path"],
+    "additionalProperties": false
+  }
+}

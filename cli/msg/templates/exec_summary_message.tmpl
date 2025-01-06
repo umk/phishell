@@ -1,0 +1,9 @@
+Provide a concise summary of what the command did, the overall outcome based on the exit code, and any notable information from the output{{ if .Tail }} tail{{end}}. Do not echo the output itself, as user has already seen it.
+
+Command Line: {{ .CommandLine }}
+Exit Code: {{ .ExitCode }}
+
+---
+Output{{ if .Tail }} Tail{{ end }}:
+
+{{ .Output }}

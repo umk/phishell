@@ -1,0 +1,15 @@
+{
+  "name": "read_file",
+  "description": "Reads file at the given path.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "path": {
+        "type": "string",
+        "description": "The relative or absolute path to the file to read."
+      }
+    },
+    "required": ["path"],
+    "additionalProperties": false
+  }
+}
