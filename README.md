@@ -1,5 +1,7 @@
 # 𝛗 shell
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/umk/phishell/provider.svg)](https://pkg.go.dev/github.com/umk/phishell/provider)
+
 **Phi Shell** is a command-line application designed to serve as a command processor with enhanced capabilities for integrating external tool providers and interacting with Large Language Models (LLMs). These tool providers are standalone programs created by users. Providers can be implemented in any programming language, taking advantage of thousands of libraries to enable features ranging from integrations with external systems to the implementation of sophisticated business logic. The host program communicates with tool providers through their `Stdin` and `Stdout`, reducing the need for extensive boilerplate code.
 
 Phi Shell is shipped with type declarations for the [Go](provider) programming language, allowing users to implement their tools with few imports and function calls.
