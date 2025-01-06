@@ -6,10 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"strings"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/cli/tool"
 	"github.com/umk/phishell/provider"
@@ -58,7 +55,7 @@ func (p *ToolProcess) readHeaderLine(b []byte) error {
 
 func (p *ToolProcess) readMessages(ctx context.Context, scanner *bufio.Scanner) error {
 	for scanner.Scan() {
-		if err := p.processMessage(ctx, scanner.Bytes()); err != nil {
+		if err := p.processMessage(scanner.Bytes()); err != nil {
 			return err
 		}
 	}
@@ -70,7 +67,7 @@ func (p *ToolProcess) readMessages(ctx context.Context, scanner *bufio.Scanner) 
 	return nil
 }
 
-func (p *ToolProcess) processMessage(ctx context.Context, message []byte) error {
+func (p *ToolProcess) processMessage(message []byte) error {
 	var raw any
 	if err := json.Unmarshal(message, &raw); err != nil {
 		// A syntax error is a protocol violation that may result in an undefined
@@ -78,44 +75,11 @@ func (p *ToolProcess) processMessage(ctx context.Context, message []byte) error 
 		return err
 	}
 
-	properties, ok := raw.(map[string]any)
-	if !ok {
-		// Invalid message format: not an object. Ignoring.
-		return nil
-	}
-
-	if _, ok := properties["call_id"]; ok {
-		var res provider.ToolResponse
-		if err := marshalx.UnmarshalJSONStruct(message, &res); err != nil {
-			// Assuming it's not a syntax error. Ignoring.
-		} else {
-			p.resolveRequest(&res)
-		}
+	var res provider.ToolResponse
+	if err := marshalx.UnmarshalJSONStruct(message, &res); err != nil {
+		// Assuming it's not a syntax error. Ignoring.
 	} else {
-		var msg provider.Message
-		if err := marshalx.UnmarshalJSONStruct(message, &msg); err != nil {
-			// Assuming it's not a syntax error. Ignoring.
-		} else {
-			content := strings.TrimSpace(msg.Content)
-
-			if content != "" {
-				id := msg.ID
-				content := strings.TrimSpace(msg.Content)
-				wd := msg.Dir
-				date := msg.Date
-
-				if id == "" {
-					id = uuid.NewString()
-				}
-
-				if date == nil || date.IsZero() {
-					now := time.Now()
-					date = &now
-				}
-
-				go p.host.events.ProcessEvent(ctx, id, content, wd, *date)
-			}
-		}
+		p.resolveRequest(&res)
 	}
 
 	return nil

@@ -43,5 +43,5 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 }
 
 func (p *AttachCommand) Info() string {
-	return "attach [cmd]: run background process that provides tools and events"
+	return "attach [cmd]: run background process that provides tools"
 }

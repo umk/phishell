@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sync"
-	"time"
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/util/execx"
@@ -13,16 +12,10 @@ import (
 type Host struct {
 	mu sync.Mutex
 
-	events EventProcessor
-
 	processes []*ToolProcess
 	tools     map[string]*processTool
 
 	wg sync.WaitGroup
-}
-
-type EventProcessor interface {
-	ProcessEvent(ctx context.Context, id, content, wd string, date time.Time) error
 }
 
 type processTool struct {
@@ -30,12 +23,8 @@ type processTool struct {
 	Tool    openai.ChatCompletionToolParam
 }
 
-func NewHost(events EventProcessor) *Host {
-	return &Host{
-		events: events,
-
-		tools: make(map[string]*processTool),
-	}
+func NewHost() *Host {
+	return &Host{tools: make(map[string]*processTool)}
 }
 
 func (h *Host) Execute(ctx context.Context, c *execx.Cmd) (*ToolProcess, error) {

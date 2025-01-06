@@ -38,29 +38,20 @@ func (c *Cli) processPrompt(ctx context.Context) error {
 	return nil
 }
 
-func (c *Cli) getPromptAndHint(ctx context.Context, mode PromptMode, inboxSize int) (prompt string, hint string) {
-	prompt = c.getPrompt(ctx, mode, inboxSize)
+func (c *Cli) getPromptAndHint(ctx context.Context, mode PromptMode) (prompt string, hint string) {
+	prompt = c.getPrompt(ctx, mode)
 	hint = c.getHint(mode)
 
 	return
 }
 
-func (c *Cli) getPrompt(ctx context.Context, mode PromptMode, inboxSize int) string {
-	var prompt string
-
+func (c *Cli) getPrompt(ctx context.Context, mode PromptMode) string {
 	switch mode {
 	case PrCommand:
-		prompt = c.getCommandPrompt()
+		return c.getCommandPrompt()
 	default:
-		prompt = c.getChatPrompt(ctx)
+		return c.getChatPrompt(ctx)
 	}
-
-	var inbox string
-	if inboxSize > 0 {
-		inbox = fmt.Sprintf("(%d) ", inboxSize)
-	}
-
-	return inbox + prompt
 }
 
 func (c *Cli) getChatPrompt(ctx context.Context) string {
@@ -114,7 +105,7 @@ func (c *Cli) getCommandPrompt() string {
 }
 
 func (c *Cli) readLine(ctx context.Context) (string, error) {
-	prompt, hint := c.getPromptAndHint(ctx, c.mode, c.session.Inbox.Len())
+	prompt, hint := c.getPromptAndHint(ctx, c.mode)
 
 	fmt.Print(prompt)
 
@@ -202,7 +193,7 @@ func (c *Cli) readLine(ctx context.Context) (string, error) {
 				fmt.Print("\r" + strings.Repeat(" ", n))
 				// Switch modes
 				c.mode = c.getNextMode(ctx, c.mode)
-				prompt, hint = c.getPromptAndHint(ctx, c.mode, c.session.Inbox.Len())
+				prompt, hint = c.getPromptAndHint(ctx, c.mode)
 				fmt.Print("\r" + prompt)
 				line = []rune{}
 
@@ -232,13 +223,8 @@ func (c *Cli) readLine(ctx context.Context) (string, error) {
 				}
 			}
 			// Not an escape sequence, but lone escape character
-			r := ""
-			if len(line) == 0 && c.mode == PrCommand {
-				r = "inbox" // A default command triggered by escape key
-			}
-
-			fmt.Printf("%s\r\n", r)
-			return r, nil
+			fmt.Printf("\r\n")
+			return "", nil
 		default:
 			// Handle multi-byte UTF-8 characters
 			// Since we've already read one byte, we might need to read more bytes to complete the rune

@@ -14,7 +14,6 @@ type Session struct {
 	Host *host.Host
 
 	History *thread.History
-	Inbox   Inbox
 
 	// Output of a previously executed command.
 	PreviousOut *PreviousOut
@@ -29,7 +28,7 @@ type PreviousOut struct {
 func NewSession() *Session {
 	session := &Session{}
 
-	session.Host = host.NewHost(session)
+	session.Host = host.NewHost()
 
 	return session
 }

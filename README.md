@@ -13,8 +13,6 @@ Phi Shell offers two distinct modes of operation:
 
 The modes can be switched between using the <kbd>Tab</kbd> key.
 
-When a tool call initiates an asynchronous operation, or if a provider starts an asynchronous process independently of a tool call, the provider can output messages to `Stdout` in the required format. This makes the host program capture the messages, making them available in the Inbox. The Inbox can be accessed by typing the `inbox` command or pressing the <kbd>Esc</kbd> key while in Basic Shell mode. The messages can then be reviewed by the user, who has the option to delete them or forward them to the chat for inference.
-
 ## Configuration
 
 Phi Shell uses two YAML files as a source of configuration:
@@ -148,8 +146,7 @@ The Basic Shell mode supports the following built-in commands:
     <tbody>
         <tr valign="top">
             <td><code>attach [cmd]</code></td>
-            <td>Run background process that provides tools and events. This actually attaches the tool provider. The
-                command line of attaching program may include both the path to the program and command line arguments.
+            <td>Run background process that provides tools. The command line of attaching program may include both the path to the program and command line arguments.
             </td>
         </tr>
         <tr valign="top">
@@ -169,10 +166,6 @@ The Basic Shell mode supports the following built-in commands:
             <td><code>history</code></td>
             <td>Display the chat messages history. Available only when running the Phi Shell with <code>-debug</code>
                 flag.</td>
-        </tr>
-        <tr valign="top">
-            <td><code>inbox</code></td>
-            <td>Show the list of incoming messages from background process.</td>
         </tr>
         <tr valign="top">
             <td><code>jobs</code></td>
@@ -213,8 +206,6 @@ To establish communication between the Phi Shell and the provider, the provider 
 2. **Signaling Readiness**: After listing the tools, the provider must print an empty line to indicate that it is ready to process tool calls.
 
 3. **Processing Tool Calls**: The provider must read input from `Stdin`, one line at a time, where each line represents a tool call. Once the tool call is processed, the provider must print the response to `Stdout`, with each response appearing on a separate line and preserving the call ID to ensure matching of requests and responses.
-
-4. **Posting Asynchronous Messages**: The provider may optionally post asynchronous messages to `Stdout`, one message per line. These messages can represent events occurring outside the context of tool calls. Providers that do not implement tools but only post events are also valid.
 
 Tool calls may be processed concurrently, and responses can be returned out of order. The Phi Shell applies timeouts while waiting for responses from the provider.
 
@@ -337,37 +328,6 @@ The communication contracts between the host and provider processes are outlined
     }
   },
   "required": ["call_id"]
-}
-```
-</details>
-
-<details>
-<summary>Standalone message</summary>
-
-```json
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "properties": {
-    "id": {
-      "type": "string",
-      "description": "Unique ID of the message used for deduplication."
-    },
-    "content": {
-      "type": "string",
-      "description": "Content of the message."
-    },
-    "dir": {
-      "type": "string",
-      "description": "Working directory to use in connection with the message."
-    },
-    "date": {
-      "type": "string",
-      "format": "date-time",
-      "description": "Date and time when the message was created by provider. Can be different from the date and time when the message was actually sent to the host."
-    }
-  },
-  "required": ["content"]
 }
 ```
 </details>

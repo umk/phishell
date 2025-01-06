@@ -37,7 +37,6 @@ func NewContext(session *session.Session, debug bool) *Context {
 	context.commands["cd"] = &CdCommand{context: context}
 	context.commands["export"] = &ExportCommand{}
 	context.commands["help"] = &HelpCommand{context: context}
-	context.commands["inbox"] = &InboxCommand{context: context}
 	context.commands["jobs"] = &JobsCommand{context: context}
 	context.commands["kill"] = &KillCommand{context: context}
 	context.commands["push"] = &PushCommand{context: context}
