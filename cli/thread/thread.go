@@ -40,6 +40,10 @@ func NewThread(
 }
 
 func (t *Thread) Post(ctx context.Context, message string) (*History, error) {
+	if err := t.compactHistory(ctx); err != nil {
+		return nil, fmt.Errorf("history compaction failed: %w", err)
+	}
+
 	message, err := msg.FormatUserMessage(&msg.UserMessageParams{
 		Request: message,
 		Context: t.history.Pending,
@@ -65,11 +69,11 @@ func (t *Thread) Post(ctx context.Context, message string) (*History, error) {
 			response := message.Choices[0].Message
 
 			if len(response.ToolCalls) == 0 {
-				sizeToks := message.Usage.TotalTokens
-
-				if err := t.processChatMessage(ctx, response, sizeToks); err != nil {
+				if err := t.processChatMessage(response); err != nil {
 					return nil, err
 				}
+
+				t.history.Toks = message.Usage.TotalTokens
 				return t.history, nil
 			}
 

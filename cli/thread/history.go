@@ -8,6 +8,7 @@ import (
 
 type History struct {
 	Messages []openai.ChatCompletionMessageParamUnion
+	Toks     int64 // Number of tokens in the messages
 
 	// A collection of pending messages to be delivered with the next
 	// user message.
@@ -32,6 +33,8 @@ func (h *History) Reset() *History {
 func (h *History) Clone() *History {
 	return &History{
 		Messages: slices.Clone(h.Messages),
-		Pending:  slices.Clone(h.Pending),
+		Toks:     h.Toks,
+
+		Pending: slices.Clone(h.Pending),
 	}
 }
