@@ -10,13 +10,19 @@ import (
 	"github.com/umk/phishell/util/execx"
 )
 
-func GetExecOutput(ctx context.Context, commandLine string, exitCode int, output execx.ProcessOutput) (string, error) {
-	outputStr, tail, err := output.Get()
+type ExecOutputParams struct {
+	CommandLine string
+	ExitCode    int
+	Output      execx.ProcessOutput
+}
+
+func GetExecOutput(ctx context.Context, params *ExecOutputParams) (string, error) {
+	outputStr, tail, err := params.Output.Get()
 	if err != nil {
 		return "", fmt.Errorf("invalid output: %w", err)
 	}
 
-	if exitCode == 0 {
+	if params.ExitCode == 0 {
 		if s, ok := getJSONObjectOrArray(outputStr); ok {
 			outputStr = s
 		}
@@ -24,16 +30,16 @@ func GetExecOutput(ctx context.Context, commandLine string, exitCode int, output
 
 	if utf8.RuneCountInString(outputStr) < 2500 {
 		return msg.FormatExecResponseMessage(&msg.ExecResponseMessageParams{
-			ExitCode: exitCode,
+			ExitCode: params.ExitCode,
 			Output:   outputStr,
 			Summary:  false,
 		})
 	}
 
 	summaryCompl, err := prompt.PromptExecSummary(ctx, &prompt.ExecSummaryPromptParams{
-		CommandLine: commandLine,
-		ExitCode:    exitCode,
-		Output:      output,
+		CommandLine: params.CommandLine,
+		ExitCode:    params.ExitCode,
+		Output:      params.Output,
 	})
 	if err != nil {
 		return "", err
@@ -45,7 +51,7 @@ func GetExecOutput(ctx context.Context, commandLine string, exitCode int, output
 	}
 
 	return msg.FormatExecResponseMessage(&msg.ExecResponseMessageParams{
-		ExitCode: exitCode,
+		ExitCode: params.ExitCode,
 		Output:   summary,
 		Summary:  tail,
 	})

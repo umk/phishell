@@ -47,7 +47,11 @@ func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error 
 		return err
 	}
 
-	outputStr, err := svc.GetExecOutput(ctx, args.String(), exitCode, processOut)
+	outputStr, err := svc.GetExecOutput(ctx, &svc.ExecOutputParams{
+		CommandLine: args.String(),
+		ExitCode:    exitCode,
+		Output:      processOut,
+	})
 	if err != nil {
 		return err
 	}
@@ -72,12 +76,11 @@ func (c *PushCommand) pushPrevious(ctx context.Context) error {
 		return errors.New("no previous output to push")
 	}
 
-	outputStr, err := svc.GetExecOutput(
-		ctx,
-		session.PreviousOut.CommandLine,
-		session.PreviousOut.ExitCode,
-		session.PreviousOut.Output,
-	)
+	outputStr, err := svc.GetExecOutput(ctx, &svc.ExecOutputParams{
+		CommandLine: session.PreviousOut.CommandLine,
+		ExitCode:    session.PreviousOut.ExitCode,
+		Output:      session.PreviousOut.Output,
+	})
 	if err != nil {
 		return err
 	}
