@@ -47,6 +47,13 @@ const (
 // LoadConfig reads configuration from flags, environment variables, and config files.
 func LoadConfig() (*Config, error) {
 	// Define command-line flags
+	flag.Usage = func() {
+		w := flag.CommandLine.Output()
+		fmt.Fprint(w, "Usage: phishell option...\n")
+		fmt.Fprint(w, "Options:\n")
+		flag.PrintDefaults()
+	}
+
 	var serviceProfIds flagx.Strings
 
 	dirFlag := flag.String("dir", "", "base directory (default current directory)")
