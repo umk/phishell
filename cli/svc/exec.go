@@ -2,9 +2,7 @@ package svc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/umk/phishell/cli/msg"
@@ -20,7 +18,7 @@ func GetExecOutput(ctx context.Context, commandLine string, exitCode int, output
 
 	if exitCode == 0 {
 		if s, ok := getJSONObjectOrArray(outputStr); ok {
-			return s, nil
+			outputStr = s
 		}
 	}
 
@@ -51,20 +49,4 @@ func GetExecOutput(ctx context.Context, commandLine string, exitCode int, output
 		Output:   summary,
 		Summary:  tail,
 	})
-}
-
-func getJSONObjectOrArray(s string) (string, bool) {
-	if (strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]")) ||
-		(strings.HasPrefix(s, "{") && strings.HasSuffix(s, "}")) {
-		var outputObj any
-		if err := json.Unmarshal([]byte(s), &outputObj); err == nil {
-			data, err := json.Marshal(outputObj)
-			if err == nil {
-				s := string(data)
-				return s, true
-			}
-		}
-	}
-
-	return "", false
 }
