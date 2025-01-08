@@ -13,14 +13,14 @@ type SummaryPromptParams struct {
 	Messages []openai.ChatCompletionMessageParamUnion
 }
 
-func PromptSummary(ctx context.Context, params *SummaryPromptParams) (string, error) {
+func PromptSummary(ctx context.Context, params *SummaryPromptParams) (*Completion, error) {
 	app := bootstrap.GetApp(ctx)
 
 	cl := client.Get(app.PrimaryClient())
 
 	m, err := msg.FormatSummaryReqMessage(&msg.SummaryReqMessageParams{})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	n := len(params.Messages)
@@ -36,15 +36,8 @@ func PromptSummary(ctx context.Context, params *SummaryPromptParams) (string, er
 		TopP:     openai.F(0.25),
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	summary, err := getCompletionContent(c)
-	if err != nil {
-		return "", err
-	}
-
-	return msg.FormatSummaryMessage(&msg.SummaryMessageParams{
-		Summary: summary,
-	})
+	return (*Completion)(c), nil
 }

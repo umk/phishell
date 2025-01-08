@@ -28,7 +28,7 @@ func NewThread(
 	host *host.Host,
 ) (*Thread, error) {
 	return &Thread{
-		history: history.Clone(),
+		history: Clone(history),
 
 		client: client,
 		host:   host,
@@ -73,7 +73,7 @@ func (t *Thread) Post(ctx context.Context, message string) (*History, error) {
 					return nil, err
 				}
 
-				t.history.Toks = message.Usage.TotalTokens
+				t.history.Toks = message.TotalToks()
 				return t.history, nil
 			}
 

@@ -32,11 +32,16 @@ func GetExecOutput(ctx context.Context, commandLine string, exitCode int, output
 		})
 	}
 
-	summary, err := prompt.PromptExecSummary(ctx, &prompt.ExecSummaryPromptParams{
+	summaryCompl, err := prompt.PromptExecSummary(ctx, &prompt.ExecSummaryPromptParams{
 		CommandLine: commandLine,
 		ExitCode:    exitCode,
 		Output:      output,
 	})
+	if err != nil {
+		return "", err
+	}
+
+	summary, err := summaryCompl.Content()
 	if err != nil {
 		return "", err
 	}

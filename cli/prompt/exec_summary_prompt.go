@@ -17,10 +17,10 @@ type ExecSummaryPromptParams struct {
 	Output      execx.ProcessOutput
 }
 
-func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (string, error) {
+func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (*Completion, error) {
 	output, tail, err := params.Output.Get()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	message, err := msg.FormatExecSummaryMessage(
@@ -32,7 +32,7 @@ func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (st
 		},
 	)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	messages := []openai.ChatCompletionMessageParamUnion{
@@ -49,13 +49,8 @@ func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (st
 		TopP:     openai.F(0.25),
 	})
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	content, err := getCompletionContent(c)
-	if err != nil {
-		return "", err
-	}
-
-	return content, nil
+	return (*Completion)(c), nil
 }

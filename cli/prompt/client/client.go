@@ -2,46 +2,27 @@ package client
 
 import (
 	"context"
-	"sync"
 
 	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/packages/ssestream"
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/util/termx"
 	"golang.org/x/sync/semaphore"
 )
 
-var mu sync.Mutex
-
-var clients = make(map[*bootstrap.ClientRef]*Client)
-
-func Get(clientRef *bootstrap.ClientRef) *Client {
-	mu.Lock()
-	defer mu.Unlock()
-
-	client, ok := clients[clientRef]
-	if !ok {
-		s := semaphore.NewWeighted(int64(clientRef.Config.Concurrency))
-		client = &Client{
-			ClientRef: clientRef,
-			s:         s,
-		}
-
-		clients[clientRef] = client
-	}
-
-	return client
-}
+const (
+	defaultBytesPerTok = 3.25
+	samplesCount       = 5
+	minSampleSize      = 100
+)
 
 type Client struct {
 	*bootstrap.ClientRef
 
-	s *semaphore.Weighted
+	s       *semaphore.Weighted
+	Samples *Samples
 }
 
-type StreamingCallback func(chunk openai.ChatCompletionChunk) error
-
-func (c Client) Completion(ctx context.Context, params openai.ChatCompletionNewParams) (
+func (c *Client) Completion(ctx context.Context, params openai.ChatCompletionNewParams) (
 	*openai.ChatCompletion, error,
 ) {
 	c.s.Acquire(ctx, 1)
@@ -56,15 +37,18 @@ func (c Client) Completion(ctx context.Context, params openai.ChatCompletionNewP
 		return
 	})
 
+	c.setSamplesFromCompl(compl)
+
 	if compl != nil {
 		messages := len(params.Messages.Value)
 		promptToks := compl.Usage.PromptTokens
 		complToks := compl.Usage.CompletionTokens
 		totalToks := compl.Usage.TotalTokens
+		bytesPerTok := c.Samples.BytesPerTok()
 
 		if bootstrap.IsDebug(ctx) {
-			termx.Muted.Printf("(messages=%d; prompt=%d; completion=%d; total=%d)\n",
-				messages, promptToks, complToks, totalToks,
+			termx.Muted.Printf("(messages=%d; prompt=%d; completion=%d; total=%d; bytes per tok=%.2f)\n",
+				messages, promptToks, complToks, totalToks, bytesPerTok,
 			)
 		}
 	}
@@ -72,44 +56,31 @@ func (c Client) Completion(ctx context.Context, params openai.ChatCompletionNewP
 	return compl, err
 }
 
-func (c Client) CompletionStreaming(
-	ctx context.Context, params openai.ChatCompletionNewParams, cb StreamingCallback,
-) error {
-	c.s.Acquire(ctx, 1)
-	defer c.s.Release(1)
-
-	paramsCur := params
-	paramsCur.StreamOptions.Value.IncludeUsage = openai.F(bootstrap.IsDebug(ctx))
-
-	var promptToks, complToks, totalToks int64
-	err := c.Request(ctx, func(client *openai.Client) (err error) {
-		stream := func() *ssestream.Stream[openai.ChatCompletionChunk] {
-			termx.SpinnerStart()
-			defer termx.SpinnerStop()
-
-			return client.Chat.Completions.NewStreaming(ctx, paramsCur)
-		}()
-
-		for stream.Next() {
-			cur := stream.Current()
-
-			promptToks += cur.Usage.PromptTokens
-			complToks += cur.Usage.CompletionTokens
-			totalToks += cur.Usage.TotalTokens
-
-			if err := cb(cur); err != nil {
-				return err
-			}
-		}
-		return stream.Err()
-	})
-
-	if bootstrap.IsDebug(ctx) {
-		messages := len(params.Messages.Value)
-		termx.Muted.Printf("\n(messages=%d; prompt=%d; completion=%d; total=%d)",
-			messages, promptToks, complToks, totalToks,
-		)
+func (c *Client) setSamplesFromCompl(compl *openai.ChatCompletion) {
+	t := compl.Usage.CompletionTokens
+	if t == 0 {
+		return
 	}
 
-	return err
+	var b int
+
+	for _, c := range compl.Choices {
+		if c.Message.Refusal != "" {
+			return
+		}
+
+		if len(c.Message.ToolCalls) > 0 {
+			return
+		}
+
+		b += len(c.Message.Content)
+	}
+
+	if b < minSampleSize {
+		return
+	}
+
+	bytesPerTok := float32(b) / float32(t)
+
+	c.Samples.put(bytesPerTok)
 }

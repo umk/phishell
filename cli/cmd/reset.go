@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/umk/phishell/cli/thread"
 	"github.com/umk/phishell/util/execx"
 )
 
@@ -12,7 +13,7 @@ type ResetCommand struct {
 }
 
 func (c *ResetCommand) Execute(ctx context.Context, args execx.Arguments) error {
-	c.context.session.History = c.context.session.History.Reset()
+	c.context.session.History = thread.Reset(c.context.session.History)
 
 	fmt.Println("OK")
 

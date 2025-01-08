@@ -14,13 +14,18 @@ type UserPromptParams struct {
 	Tools    []openai.ChatCompletionToolParam
 }
 
-func PromptUser(ctx context.Context, params *UserPromptParams) (*openai.ChatCompletion, error) {
+func PromptUser(ctx context.Context, params *UserPromptParams) (*Completion, error) {
 	cl := client.Get(params.Client)
 
-	return cl.Completion(ctx, openai.ChatCompletionNewParams{
+	c, err := cl.Completion(ctx, openai.ChatCompletionNewParams{
 		Messages: openai.F(params.Messages),
 		Model:    openai.F(cl.GetModel(ctx, client.Tier1)),
 		Tools:    openai.F(params.Tools),
 		TopP:     openai.F(0.25),
 	})
+	if err != nil {
+		return nil, err
+	}
+
+	return (*Completion)(c), nil
 }
