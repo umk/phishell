@@ -14,9 +14,7 @@ type SummaryPromptParams struct {
 }
 
 func PromptSummary(ctx context.Context, params *SummaryPromptParams) (*Completion, error) {
-	app := bootstrap.GetApp(ctx)
-
-	cl := client.Get(app.PrimaryClient())
+	cl := client.Get(bootstrap.GetPrimaryClient(ctx))
 
 	m, err := msg.FormatSummaryReqMessage(&msg.SummaryReqMessageParams{})
 	if err != nil {

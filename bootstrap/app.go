@@ -17,11 +17,3 @@ func NewApp(config *Config) *App {
 
 	return app
 }
-
-func (a *App) PrimaryClient() *ClientRef {
-	if len(a.Clients) == 0 {
-		panic("no clients defined for the app")
-	}
-
-	return a.Clients[0]
-}

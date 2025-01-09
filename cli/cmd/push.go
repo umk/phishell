@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/msg"
 	"github.com/umk/phishell/cli/svc"
 	"github.com/umk/phishell/util/execx"
@@ -47,7 +48,8 @@ func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error 
 		return err
 	}
 
-	outputStr, err := svc.GetExecOutput(ctx, &svc.ExecOutputParams{
+	cr := bootstrap.GetPrimaryClient(ctx)
+	outputStr, err := svc.GetExecOutput(ctx, cr, &svc.ExecOutputParams{
 		CommandLine: args.String(),
 		ExitCode:    exitCode,
 		Output:      processOut,
@@ -76,7 +78,8 @@ func (c *PushCommand) pushPrevious(ctx context.Context) error {
 		return errors.New("no previous output to push")
 	}
 
-	outputStr, err := svc.GetExecOutput(ctx, &svc.ExecOutputParams{
+	cr := bootstrap.GetPrimaryClient(ctx)
+	outputStr, err := svc.GetExecOutput(ctx, cr, &svc.ExecOutputParams{
 		CommandLine: session.PreviousOut.CommandLine,
 		ExitCode:    session.PreviousOut.ExitCode,
 		Output:      session.PreviousOut.Output,

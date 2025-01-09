@@ -33,3 +33,14 @@ func GetVersion(ctx context.Context) string {
 func IsDebug(ctx context.Context) bool {
 	return GetApp(ctx).Config.Debug
 }
+
+// GetPrimaryClient gets the client to use outside of the chat context.
+func GetPrimaryClient(ctx context.Context) *ClientRef {
+	a := GetApp(ctx)
+
+	if len(a.Clients) == 0 {
+		panic("no clients defined for the app")
+	}
+
+	return a.Clients[0]
+}

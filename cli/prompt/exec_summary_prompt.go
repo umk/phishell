@@ -12,12 +12,15 @@ import (
 )
 
 type ExecSummaryPromptParams struct {
+	Client      *bootstrap.ClientRef
 	CommandLine string
 	ExitCode    int
 	Output      execx.ProcessOutput
 }
 
 func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (*Completion, error) {
+	cl := client.Get(params.Client)
+
 	output, tail, err := params.Output.Get()
 	if err != nil {
 		return nil, err
@@ -38,10 +41,6 @@ func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (*C
 	messages := []openai.ChatCompletionMessageParamUnion{
 		openai.UserMessage(message),
 	}
-
-	app := bootstrap.GetApp(ctx)
-
-	cl := client.Get(app.PrimaryClient())
 
 	c, err := cl.Completion(ctx, openai.ChatCompletionNewParams{
 		Messages: openai.F(messages),

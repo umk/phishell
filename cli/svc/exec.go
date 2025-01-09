@@ -3,8 +3,8 @@ package svc
 import (
 	"context"
 	"fmt"
-	"unicode/utf8"
 
+	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/msg"
 	"github.com/umk/phishell/cli/prompt"
 	"github.com/umk/phishell/util/execx"
@@ -16,7 +16,7 @@ type ExecOutputParams struct {
 	Output      execx.ProcessOutput
 }
 
-func GetExecOutput(ctx context.Context, params *ExecOutputParams) (string, error) {
+func GetExecOutput(ctx context.Context, cr *bootstrap.ClientRef, params *ExecOutputParams) (string, error) {
 	outputStr, tail, err := params.Output.Get()
 	if err != nil {
 		return "", fmt.Errorf("invalid output: %w", err)
@@ -28,7 +28,7 @@ func GetExecOutput(ctx context.Context, params *ExecOutputParams) (string, error
 		}
 	}
 
-	if utf8.RuneCountInString(outputStr) < 2500 {
+	if !mustSummarizeResp(cr, outputStr) {
 		return msg.FormatExecResponseMessage(&msg.ExecResponseMessageParams{
 			ExitCode: params.ExitCode,
 			Output:   outputStr,
@@ -37,6 +37,7 @@ func GetExecOutput(ctx context.Context, params *ExecOutputParams) (string, error
 	}
 
 	summaryCompl, err := prompt.PromptExecSummary(ctx, &prompt.ExecSummaryPromptParams{
+		Client:      cr,
 		CommandLine: params.CommandLine,
 		ExitCode:    params.ExitCode,
 		Output:      params.Output,

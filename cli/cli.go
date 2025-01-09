@@ -51,10 +51,9 @@ func (c *Cli) Init(ctx context.Context) error {
 		return err
 	}
 
-	client := app.PrimaryClient()
-
+	cr := bootstrap.GetPrimaryClient(ctx)
 	message, err := msg.FormatSystemMessage(&msg.SystemMessageParams{
-		Prompt: client.Config.Prompt,
+		Prompt: cr.Config.Prompt,
 		OS:     runtime.GOOS,
 	})
 	if err != nil {
