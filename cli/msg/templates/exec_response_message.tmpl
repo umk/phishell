@@ -8,7 +8,13 @@ Output{{ if .Summary }} Summary{{ end }}:
 {{- end }}
 
 {{- if .Output }}
+{{- if .Summary }}
 {{- .Output }}
+{{- else }}
+`````
+{{- .Output }}
+`````
+{{- end }}
 {{- else }}
 The command returned an empty output.
 {{- end }}
