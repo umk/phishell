@@ -9,7 +9,7 @@ import (
 
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/msg"
-	"github.com/umk/phishell/cli/svc"
+	"github.com/umk/phishell/cli/response"
 	"github.com/umk/phishell/util/execx"
 )
 
@@ -49,7 +49,7 @@ func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error 
 	}
 
 	cr := bootstrap.GetPrimaryClient(ctx)
-	outputStr, err := svc.GetExecOutput(ctx, cr, &svc.ExecOutputParams{
+	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: args.String(),
 		ExitCode:    exitCode,
 		Output:      processOut,
@@ -79,7 +79,7 @@ func (c *PushCommand) pushPrevious(ctx context.Context) error {
 	}
 
 	cr := bootstrap.GetPrimaryClient(ctx)
-	outputStr, err := svc.GetExecOutput(ctx, cr, &svc.ExecOutputParams{
+	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: session.PreviousOut.CommandLine,
 		ExitCode:    session.PreviousOut.ExitCode,
 		Output:      session.PreviousOut.Output,

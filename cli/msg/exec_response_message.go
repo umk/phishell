@@ -9,6 +9,7 @@ import (
 type ExecResponseMessageParams struct {
 	ExitCode int
 	Output   string
+	Tail     bool
 	Summary  bool
 }
 

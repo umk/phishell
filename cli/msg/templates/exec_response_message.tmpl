@@ -2,7 +2,7 @@
 Exit Code: {{ .ExitCode }}
 
 {{- if .Output }}
-Output{{ if .Summary }} Summary{{ end }}:
+Output{{ if .Tail }} Tail{{ end }}{{ if .Summary }} Summary{{ end }}:
 {{- end }}
 
 {{- end }}

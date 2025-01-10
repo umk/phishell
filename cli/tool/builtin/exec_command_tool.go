@@ -9,7 +9,7 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/svc"
+	"github.com/umk/phishell/cli/response"
 	"github.com/umk/phishell/cli/tool"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/execx"
@@ -108,7 +108,7 @@ func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
 	}
 
 	cr := bootstrap.GetPrimaryClient(ctx)
-	output, err := svc.GetExecOutput(ctx, cr, &svc.ExecOutputParams{
+	output, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: h.arguments.CommandLine,
 		ExitCode:    exitCode,
 		Output:      processOut,

@@ -1,4 +1,4 @@
-package svc
+package response
 
 import (
 	"context"
@@ -32,6 +32,7 @@ func GetExecOutput(ctx context.Context, cr *bootstrap.ClientRef, params *ExecOut
 		return msg.FormatExecResponseMessage(&msg.ExecResponseMessageParams{
 			ExitCode: params.ExitCode,
 			Output:   outputStr,
+			Tail:     tail,
 			Summary:  false,
 		})
 	}
@@ -54,6 +55,7 @@ func GetExecOutput(ctx context.Context, cr *bootstrap.ClientRef, params *ExecOut
 	return msg.FormatExecResponseMessage(&msg.ExecResponseMessageParams{
 		ExitCode: params.ExitCode,
 		Output:   summary,
-		Summary:  tail,
+		Tail:     false,
+		Summary:  true,
 	})
 }

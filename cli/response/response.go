@@ -1,4 +1,4 @@
-package svc
+package response
 
 import (
 	"encoding/json"

@@ -6,7 +6,13 @@ Headers:
 {{- end }}
 {{- end }}
 {{- if .Body }}
+---
+{{ if .Summary -}}
+Response Summary:
+{{- else -}}
 Body:
+{{- end }}
+
 `````
 {{ .Body }}
 `````

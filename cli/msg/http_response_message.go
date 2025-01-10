@@ -7,10 +7,10 @@ import (
 )
 
 type HttpResponseMessageParams struct {
-	Status     string
-	StatusCode int
-	Headers    map[string][]string
-	Body       string
+	Status  string
+	Headers map[string][]string
+	Body    string
+	Summary bool
 }
 
 //go:embed templates/http_response_message.tmpl

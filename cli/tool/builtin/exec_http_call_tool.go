@@ -11,11 +11,15 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/msg"
+	"github.com/umk/phishell/cli/response"
 	"github.com/umk/phishell/cli/tool"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/marshalx"
 )
+
+var allowedHeaders = map[string]bool{
+	"content-type": true,
+}
 
 //go:embed schemas/exec_http_call.json
 var execHttpCallFunctionBytes []byte
@@ -113,19 +117,36 @@ func (h *ExecHttpCallToolHandler) Execute(ctx context.Context) (any, error) {
 		}
 	}
 
-	r, err := msg.FormatHttpResponseMessage(&msg.HttpResponseMessageParams{
-		Status:     resp.Status,
-		StatusCode: resp.StatusCode,
-		Headers:    resp.Header,
-		Body:       rb,
+	header := getHttpResponseHeaders(resp)
+
+	cr := bootstrap.GetPrimaryClient(ctx)
+	output, err := response.GetHttpOutput(ctx, cr, &response.HttpOutputParams{
+		Url:     h.url.String(),
+		Status:  resp.Status,
+		Headers: header,
+		Body:    rb,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return r, nil
+	return output, nil
 }
 
 func (h *ExecHttpCallToolHandler) Describe(ctx context.Context) (string, error) {
 	return fmt.Sprintf("%s %s", h.arguments.Method, h.url), nil
+}
+
+func getHttpResponseHeaders(resp *http.Response) http.Header {
+	header := make(http.Header)
+	if resp.Header != nil {
+		for k, v := range resp.Header {
+			lk := strings.ToLower(k)
+			if _, ok := allowedHeaders[lk]; ok {
+				header[k] = v
+			}
+		}
+	}
+
+	return header
 }
