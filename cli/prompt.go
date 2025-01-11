@@ -21,15 +21,15 @@ type promptController interface {
 }
 
 func (c *Cli) processScriptPrompt(ctx context.Context) error {
-	app := bootstrap.GetApp(ctx)
-	if app.Config.Startup.Script == "" {
+	config := bootstrap.GetConfig(ctx)
+	if !bootstrap.IsScript(ctx) {
 		return nil
 	}
 
 	c.mode = PrChat
 
 	client := c.getClient(ctx)
-	p := strings.TrimSpace(app.Config.Startup.Prompt)
+	p := strings.TrimSpace(config.Startup.Prompt)
 
 	if p == "" {
 		line, err := c.readLine(ctx, &promptScript{cli: c})

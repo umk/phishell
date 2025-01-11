@@ -45,9 +45,9 @@ func (p *promptChat) getHint(ctx context.Context, mode PromptMode) string {
 }
 
 func (p *promptChat) getNextMode(ctx context.Context, current PromptMode) PromptMode {
-	app := bootstrap.GetApp(ctx)
+	clients := bootstrap.GetClients(ctx)
 
-	max := int(PrChat) + len(app.Clients)
+	max := int(PrChat) + len(clients)
 
 	return PromptMode((int(current) + 1) % max)
 }
