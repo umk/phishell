@@ -38,8 +38,6 @@ func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handle
 		return builtin.NewFsReadToolHandler(f.Arguments, wd)
 	case builtin.FsDeleteToolName:
 		return builtin.NewFsDeleteToolHandler(f.Arguments, wd)
-	case builtin.FsStatToolName:
-		return builtin.NewFsStatToolHandler(f.Arguments, wd)
 	case builtin.ExecCommandToolName:
 		return builtin.NewExecCommandToolHandler(f.Arguments, wd)
 	case builtin.ExecHttpCallToolName:

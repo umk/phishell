@@ -364,10 +364,6 @@ Phi Shell offers several basic tools to use with daily tasks. These tools are av
             <td><a href="cli/tool/builtin/schemas/fs_delete.json">Delete File Or Directory</a></td>
             <td>Deletes a file or directory. Can delete directories recursively if explicitly asked to.</td>
         </tr>
-        <tr valign="top">
-            <td><a href="cli/tool/builtin/schemas/fs_stat.json">Get File System Entry Info</a></td>
-            <td>Gets information about a file system entry, whether it exists and what kind of entry it is.</td>
-        </tr>
     </tbody>
 </table>
 

@@ -8,5 +8,4 @@ var Tools = []openai.ChatCompletionToolParam{
 	FsCreateOrUpdateTool,
 	FsDeleteTool,
 	FsReadTool,
-	FsStatTool,
 }
