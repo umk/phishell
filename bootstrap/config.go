@@ -5,15 +5,23 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/umk/phishell/util/execx"
 	"github.com/umk/phishell/util/flagx"
 )
 
 type Config struct {
+	Startup ConfigStartup
+
 	Dir     string
 	Debug   bool
 	Version bool
 
 	Services []*ConfigService
+}
+
+type ConfigStartup struct {
+	Script string
+	Prompt string
 }
 
 type ConfigService struct {
@@ -50,6 +58,8 @@ func LoadConfig() (*Config, error) {
 	flag.Usage = func() {
 		w := flag.CommandLine.Output()
 		fmt.Fprint(w, "Usage: phishell option...\n")
+		fmt.Fprint(w, "       phishell option... script-file\n")
+		fmt.Fprint(w, "       phishell option... script-file prompt\n")
 		fmt.Fprint(w, "Options:\n")
 		flag.PrintDefaults()
 	}
@@ -63,6 +73,12 @@ func LoadConfig() (*Config, error) {
 
 	// Parse the flags
 	flag.Parse()
+
+	args := execx.Arguments(flag.Args())
+	if len(args) > 2 {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	// Determine the current directory
 	var currentDir string
@@ -96,6 +112,11 @@ func LoadConfig() (*Config, error) {
 
 	// Initialize Config with default values
 	config := &Config{
+		Startup: ConfigStartup{
+			Script: args.Get(0),
+			Prompt: args.Get(1),
+		},
+
 		Dir:     currentDir,
 		Debug:   *debugFlag,
 		Version: *versionFlag,

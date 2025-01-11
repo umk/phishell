@@ -8,6 +8,7 @@ import (
 
 type SystemMessageParams struct {
 	Prompt string
+	Script string
 	OS     string
 }
 

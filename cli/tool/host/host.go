@@ -59,7 +59,7 @@ func (h *Host) Execute(ctx context.Context, c *execx.Cmd) (*ToolProcess, error) 
 	}
 
 	if err := p.initialize(ctx, stdout); err != nil {
-		p.Terminate(TsFailed, err.Error())
+		p.Terminate(ctx, TsFailed, err.Error())
 		return nil, err
 	}
 
@@ -75,14 +75,14 @@ func (h *Host) Execute(ctx context.Context, c *execx.Cmd) (*ToolProcess, error) 
 	return p, nil
 }
 
-func (h *Host) Close() error {
+func (h *Host) Close(ctx context.Context) error {
 	go func() {
 		h.mu.Lock()
 		defer h.mu.Unlock()
 
 		for _, process := range h.processes {
 			if process.Info.Status == TsRunning {
-				go process.Terminate(TsCompleted, "")
+				go process.Terminate(ctx, TsCompleted, "")
 			}
 		}
 	}()

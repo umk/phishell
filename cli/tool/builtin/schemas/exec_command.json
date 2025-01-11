@@ -1,6 +1,6 @@
 {
-  "name": "execute_console_command",
-  "description": "Executes a non-interactive console command with its arguments.",
+  "name": "execute_command",
+  "description": "Executes a console command with its arguments.",
   "parameters": {
     "type": "object",
     "properties": {

@@ -107,7 +107,7 @@ func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
 		return nil, err
 	}
 
-	cr := bootstrap.GetPrimaryClient(ctx)
+	cr := bootstrap.GetClient(ctx)
 	output, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: h.arguments.CommandLine,
 		ExitCode:    exitCode,

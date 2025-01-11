@@ -6,11 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
 
 	"github.com/openai/openai-go"
+	"github.com/umk/phishell/bootstrap"
 )
 
 type ToolProcess struct {
@@ -77,18 +79,23 @@ func (p *ToolProcess) initialize(ctx context.Context, stdout io.Reader) error {
 	}
 
 	go func() {
-		if err := p.readMessages(ctx, scanner); err != nil {
-			p.Terminate(TsFailed, err.Error())
+		if err := p.readMessages(scanner); err != nil {
+			p.Terminate(ctx, TsFailed, err.Error())
 		}
 	}()
 
 	return nil
 }
 
-func (p *ToolProcess) Terminate(status ToolStatus, message string) {
+func (p *ToolProcess) Terminate(ctx context.Context, status ToolStatus, message string) {
 	p.finalize(status, message)
 
 	p.cmd.Process.Kill()
+
+	if status == TsFailed && bootstrap.IsScript(ctx) {
+		fmt.Println(message)
+		os.Exit(1)
+	}
 }
 
 func (p *ToolProcess) Wait() ToolStatus {

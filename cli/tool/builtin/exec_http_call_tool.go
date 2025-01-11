@@ -119,7 +119,7 @@ func (h *ExecHttpCallToolHandler) Execute(ctx context.Context) (any, error) {
 
 	header := getHttpResponseHeaders(resp)
 
-	cr := bootstrap.GetPrimaryClient(ctx)
+	cr := bootstrap.GetClient(ctx)
 	output, err := response.GetHttpOutput(ctx, cr, &response.HttpOutputParams{
 		Url:     h.url.String(),
 		Status:  resp.Status,

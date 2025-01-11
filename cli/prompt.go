@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
 	"unicode/utf8"
 
@@ -15,8 +14,41 @@ import (
 	"golang.org/x/term"
 )
 
+type promptController interface {
+	getPrompt(ctx context.Context, mode PromptMode) string
+	getHint(ctx context.Context, mode PromptMode) string
+	getNextMode(ctx context.Context, current PromptMode) PromptMode
+}
+
+func (c *Cli) processScriptPrompt(ctx context.Context) error {
+	app := bootstrap.GetApp(ctx)
+	if app.Config.Startup.Script == "" {
+		return nil
+	}
+
+	c.mode = PrChat
+
+	client := c.getClient(ctx)
+	p := strings.TrimSpace(app.Config.Startup.Prompt)
+
+	if p == "" {
+		line, err := c.readLine(ctx, &promptScript{cli: c})
+		if err != nil {
+			return err
+		}
+
+		p = line
+	}
+
+	if p == "" {
+		p = "Proceed with the script execution"
+	}
+
+	return c.session.ProcessChat(ctx, client, p)
+}
+
 func (c *Cli) processPrompt(ctx context.Context) error {
-	line, err := c.readLine(ctx)
+	line, err := c.readLine(ctx, &promptChat{cli: c})
 	if err != nil {
 		return err
 	}
@@ -38,76 +70,9 @@ func (c *Cli) processPrompt(ctx context.Context) error {
 	return nil
 }
 
-func (c *Cli) getPromptAndHint(ctx context.Context, mode PromptMode) (prompt string, hint string) {
-	prompt = c.getPrompt(ctx, mode)
-	hint = c.getHint(mode)
-
-	return
-}
-
-func (c *Cli) getPrompt(ctx context.Context, mode PromptMode) string {
-	switch mode {
-	case PrCommand:
-		return c.getCommandPrompt()
-	default:
-		return c.getChatPrompt(ctx)
-	}
-}
-
-func (c *Cli) getChatPrompt(ctx context.Context) string {
-	client := c.getClient(ctx)
-
-	return fmt.Sprintf("%s >>> ", client.Config.Profile)
-}
-
-func (c *Cli) getHint(mode PromptMode) string {
-	if mode == PrCommand {
-		return ""
-	}
-
-	dir, err := os.Getwd()
-	if err != nil {
-		return ""
-	}
-
-	homeDir, err := os.UserHomeDir()
-
-	if err == nil && dir == homeDir {
-		return "~"
-	} else if dir == "/" {
-		return "/"
-	} else {
-		dirName := filepath.Base(dir)
-		return dirName + "/"
-	}
-}
-
-func (c *Cli) getCommandPrompt() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		return ""
-	}
-
-	var base string
-
-	homeDir, err := os.UserHomeDir()
-
-	if err == nil && dir == homeDir {
-		base = "~"
-	} else if dir == "/" {
-		base = "/"
-	} else {
-		dirName := filepath.Base(dir)
-		base = dirName
-	}
-
-	return base + " $ "
-}
-
-func (c *Cli) readLine(ctx context.Context) (string, error) {
-	prompt, hint := c.getPromptAndHint(ctx, c.mode)
-
-	fmt.Print(prompt)
+func (c *Cli) readLine(ctx context.Context, contr promptController) (string, error) {
+	prompt := contr.getPrompt(ctx, c.mode)
+	hint := contr.getHint(ctx, c.mode)
 
 	// Put terminal into raw mode
 	s, err := term.MakeRaw(int(os.Stdin.Fd()))
@@ -115,6 +80,9 @@ func (c *Cli) readLine(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("error entering raw mode: %w", err)
 	}
 	defer term.Restore(int(os.Stdin.Fd()), s)
+
+Restart:
+	fmt.Print(prompt)
 
 	var line []rune
 	atStart := true
@@ -158,7 +126,7 @@ func (c *Cli) readLine(ctx context.Context) (string, error) {
 			return string(line), nil
 		case 3: // Ctrl+C
 			fmt.Print("\r\n")
-			return "", nil
+			goto Restart
 		case 4: // Ctrl+D (EOF)
 			fmt.Print("\r\n")
 			return "", io.EOF
@@ -191,9 +159,12 @@ func (c *Cli) readLine(ctx context.Context) (string, error) {
 					n = utf8.RuneCountInString(prompt) + len(line)
 				}
 				fmt.Print("\r" + strings.Repeat(" ", n))
-				// Switch modes
-				c.mode = c.getNextMode(ctx, c.mode)
-				prompt, hint = c.getPromptAndHint(ctx, c.mode)
+
+				c.mode = contr.getNextMode(ctx, c.mode)
+
+				prompt = contr.getPrompt(ctx, c.mode)
+				hint = contr.getHint(ctx, c.mode)
+
 				fmt.Print("\r" + prompt)
 				line = []rune{}
 
@@ -224,7 +195,7 @@ func (c *Cli) readLine(ctx context.Context) (string, error) {
 			}
 			// Not an escape sequence, but lone escape character
 			fmt.Printf("\r\n")
-			return "", nil
+			goto Restart
 		default:
 			// Handle multi-byte UTF-8 characters
 			// Since we've already read one byte, we might need to read more bytes to complete the rune
@@ -276,12 +247,4 @@ func (c *Cli) readLine(ctx context.Context) (string, error) {
 			}
 		}
 	}
-}
-
-func (c *Cli) getNextMode(ctx context.Context, current PromptMode) PromptMode {
-	app := bootstrap.GetApp(ctx)
-
-	max := int(PrChat) + len(app.Clients)
-
-	return PromptMode((int(current) + 1) % max)
 }

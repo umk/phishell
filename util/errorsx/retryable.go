@@ -17,6 +17,6 @@ func (e retryableError) Error() string {
 
 // IsRetryable checks if an error is retryable
 func IsRetryable(err error) bool {
-	var e *retryableError
+	var e retryableError
 	return errors.As(err, &e)
 }

@@ -29,13 +29,8 @@ func GetVersion(ctx context.Context) string {
 	return ctx.Value(CtxVersion).(string)
 }
 
-// IsDebug gets a value indicating whether debugging is enabled for this session.
-func IsDebug(ctx context.Context) bool {
-	return GetApp(ctx).Config.Debug
-}
-
-// GetPrimaryClient gets the client to use outside of the chat context.
-func GetPrimaryClient(ctx context.Context) *ClientRef {
+// GetClient gets the default client to use outside of the chat context.
+func GetClient(ctx context.Context) *ClientRef {
 	a := GetApp(ctx)
 
 	if len(a.Clients) == 0 {
@@ -43,4 +38,14 @@ func GetPrimaryClient(ctx context.Context) *ClientRef {
 	}
 
 	return a.Clients[0]
+}
+
+// IsDebug gets a value indicating whether debugging is enabled for this session.
+func IsDebug(ctx context.Context) bool {
+	return GetApp(ctx).Config.Debug
+}
+
+// IsScript gets a value indicating whether the program is executing a script.
+func IsScript(ctx context.Context) bool {
+	return GetApp(ctx).Config.Startup.Script != ""
 }

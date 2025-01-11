@@ -51,9 +51,20 @@ func (c *Cli) Init(ctx context.Context) error {
 		return err
 	}
 
-	cr := bootstrap.GetPrimaryClient(ctx)
+	var script string
+	if app.Config.Startup.Script != "" {
+		s, err := readScript(app.Config.Startup.Script)
+		if err != nil {
+			return err
+		}
+
+		script = s
+	}
+
+	cr := bootstrap.GetClient(ctx)
 	message, err := msg.FormatSystemMessage(&msg.SystemMessageParams{
 		Prompt: cr.Config.Prompt,
+		Script: script,
 		OS:     runtime.GOOS,
 	})
 	if err != nil {
@@ -70,23 +81,35 @@ func (c *Cli) Init(ctx context.Context) error {
 }
 
 func (c *Cli) Run(ctx context.Context) error {
-	defer c.session.Host.Close()
+	defer c.session.Host.Close(ctx)
 
 	cancelThisContext := cancelOnSigTerm()
+
+	{
+		ctx := cancelThisContext(ctx)
+
+		if err := c.processScriptPrompt(ctx); err != nil {
+			if errors.Is(err, io.EOF) || errorsx.IsCanceled(err) {
+				return nil
+			} else {
+				return err
+			}
+		}
+	}
 
 	for {
 		ctx := cancelThisContext(ctx)
 
 		if err := c.processPrompt(ctx); err != nil {
 			if errors.Is(err, io.EOF) {
-				break
+				return nil
+			} else if errorsx.IsCanceled(err) {
+				// Do nothing
 			} else {
-				processCliError(err)
+				termx.Error.Println(err)
 			}
 		}
 	}
-
-	return nil
 }
 
 func (c *Cli) getClient(ctx context.Context) *bootstrap.ClientRef {
@@ -98,14 +121,6 @@ func (c *Cli) getClient(ctx context.Context) *bootstrap.ClientRef {
 	app := bootstrap.GetApp(ctx)
 
 	return app.Clients[n]
-}
-
-func processCliError(err error) {
-	if errorsx.IsCanceled(err) {
-		// Do nothing
-	} else {
-		termx.Error.Println(err)
-	}
 }
 
 func cancelOnSigTerm() func(context.Context) context.Context {

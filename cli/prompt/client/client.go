@@ -37,9 +37,9 @@ func (c *Client) Completion(ctx context.Context, params openai.ChatCompletionNew
 		return
 	})
 
-	c.setSamplesFromCompl(compl)
-
 	if compl != nil {
+		c.setSamplesFromCompl(compl)
+
 		messages := len(params.Messages.Value)
 		promptToks := compl.Usage.PromptTokens
 		complToks := compl.Usage.CompletionTokens

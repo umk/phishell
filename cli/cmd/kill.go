@@ -28,7 +28,7 @@ func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 		return fmt.Errorf("no such job: %d", pid)
 	}
 
-	cmd.process.Terminate(host.TsCompleted, "terminated by user")
+	cmd.process.Terminate(ctx, host.TsCompleted, "terminated by user")
 
 	c.context.refreshJobs()
 

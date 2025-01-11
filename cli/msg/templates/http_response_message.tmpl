@@ -1,9 +1,6 @@
 Status: {{ .Status }}
-{{- if .Headers }}
-Headers:
 {{- range $key, $values := .Headers }}
 {{ $key }}: {{ range $values }}{{.}} {{ end }}
-{{- end }}
 {{- end }}
 {{- if .Body }}
 ---

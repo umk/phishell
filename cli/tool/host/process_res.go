@@ -2,7 +2,6 @@ package host
 
 import (
 	"bufio"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -53,7 +52,7 @@ func (p *ToolProcess) readHeaderLine(b []byte) error {
 	return nil
 }
 
-func (p *ToolProcess) readMessages(ctx context.Context, scanner *bufio.Scanner) error {
+func (p *ToolProcess) readMessages(scanner *bufio.Scanner) error {
 	for scanner.Scan() {
 		if err := p.processMessage(scanner.Bytes()); err != nil {
 			return err

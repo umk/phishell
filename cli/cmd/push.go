@@ -48,7 +48,7 @@ func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error 
 		return err
 	}
 
-	cr := bootstrap.GetPrimaryClient(ctx)
+	cr := bootstrap.GetClient(ctx)
 	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: args.String(),
 		ExitCode:    exitCode,
@@ -78,7 +78,7 @@ func (c *PushCommand) pushPrevious(ctx context.Context) error {
 		return errors.New("no previous output to push")
 	}
 
-	cr := bootstrap.GetPrimaryClient(ctx)
+	cr := bootstrap.GetClient(ctx)
 	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: session.PreviousOut.CommandLine,
 		ExitCode:    session.PreviousOut.ExitCode,
