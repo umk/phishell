@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/thread"
+	"github.com/umk/phishell/thread"
 )
 
 func (s *Session) ProcessChat(ctx context.Context, client *bootstrap.ClientRef, content string) error {

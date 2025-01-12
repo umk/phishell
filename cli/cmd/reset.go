@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/umk/phishell/cli/thread"
+	"github.com/umk/phishell/thread"
 	"github.com/umk/phishell/util/execx"
 )
 

@@ -12,9 +12,9 @@ import (
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/cmd"
-	"github.com/umk/phishell/cli/msg"
 	"github.com/umk/phishell/cli/session"
-	"github.com/umk/phishell/cli/thread"
+	"github.com/umk/phishell/msg"
+	"github.com/umk/phishell/thread"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/termx"
 )

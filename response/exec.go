@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/msg"
-	"github.com/umk/phishell/cli/prompt"
+	"github.com/umk/phishell/msg"
+	"github.com/umk/phishell/prompt"
 	"github.com/umk/phishell/util/execx"
 )
 

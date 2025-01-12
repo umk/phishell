@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/umk/phishell/cli/session"
-	"github.com/umk/phishell/cli/tool/host"
+	"github.com/umk/phishell/tool/host"
 	"github.com/umk/phishell/util/execx"
 )
 

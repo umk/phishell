@@ -12,7 +12,7 @@ import (
 	"github.com/openai/openai-go"
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/tool"
+	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/fsx"
 	"github.com/umk/phishell/util/marshalx"

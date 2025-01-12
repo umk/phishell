@@ -6,9 +6,9 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/msg"
-	"github.com/umk/phishell/cli/prompt"
-	"github.com/umk/phishell/cli/tool/host"
+	"github.com/umk/phishell/msg"
+	"github.com/umk/phishell/prompt"
+	"github.com/umk/phishell/tool/host"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/termx"
 )

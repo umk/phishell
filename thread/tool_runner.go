@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/cli/tool"
-	"github.com/umk/phishell/cli/tool/host"
+	"github.com/umk/phishell/tool"
+	"github.com/umk/phishell/tool/host"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/stringsx"
 	"github.com/umk/phishell/util/termx"

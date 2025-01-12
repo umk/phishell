@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/umk/phishell/cli/thread"
-	"github.com/umk/phishell/cli/tool/host"
+	"github.com/umk/phishell/thread"
+	"github.com/umk/phishell/tool/host"
 	"github.com/umk/phishell/util/execx"
 )
 

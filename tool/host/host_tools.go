@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/cli/tool"
-	"github.com/umk/phishell/cli/tool/builtin"
 	"github.com/umk/phishell/provider"
+	"github.com/umk/phishell/tool"
+	"github.com/umk/phishell/tool/builtin"
 )
 
 func (h *Host) Tools() []openai.ChatCompletionToolParam {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/prompt/client"
+	"github.com/umk/phishell/prompt/client"
 )
 
 type UserPromptParams struct {

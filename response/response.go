@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/prompt/client"
+	"github.com/umk/phishell/prompt/client"
 )
 
 const compactToSumRatio = 3

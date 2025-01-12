@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/cli/msg"
-	"github.com/umk/phishell/cli/prompt"
-	"github.com/umk/phishell/cli/prompt/client"
+	"github.com/umk/phishell/msg"
+	"github.com/umk/phishell/prompt"
+	"github.com/umk/phishell/prompt/client"
 	"github.com/umk/phishell/util/termx"
 )
 

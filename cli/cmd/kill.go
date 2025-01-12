@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/umk/phishell/cli/tool/host"
+	"github.com/umk/phishell/tool/host"
 	"github.com/umk/phishell/util/execx"
 )
 
