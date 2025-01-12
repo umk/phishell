@@ -345,23 +345,23 @@ Phi Shell offers several basic tools to use with daily tasks. These tools are av
     </thead>
     <tbody>
         <tr valign="top">
-            <td><a href="cli/tool/builtin/schemas/exec_command.json">Execute Command</a></td>
+            <td><a href="tool/builtin/schemas/exec_command.json">Execute Command</a></td>
             <td>Executes a console command or chain of piped commands</td>
         </tr>
         <tr valign="top">
-            <td><a href="cli/tool/builtin/schemas/exec_http_call.json">Send HTTP Request</a></td>
+            <td><a href="tool/builtin/schemas/exec_http_call.json">Send HTTP Request</a></td>
             <td>Sends an HTTP request, given a URL, method, headers, query parameters and body of request</td>
         </tr>
         <tr valign="top">
-            <td><a href="cli/tool/builtin/schemas/fs_create_update.json">Create Or Update File</a></td>
+            <td><a href="tool/builtin/schemas/fs_create_update.json">Create Or Update File</a></td>
             <td>Creates or updates a file. When updating the file, the user is provided with diff between previous and current versions to approve or reject the changes.</td>
         </tr>
         <tr valign="top">
-            <td><a href="cli/tool/builtin/schemas/fs_read.json">Read File</a></td>
+            <td><a href="tool/builtin/schemas/fs_read.json">Read File</a></td>
             <td>Reads a file</td>
         </tr>
         <tr valign="top">
-            <td><a href="cli/tool/builtin/schemas/fs_delete.json">Delete File Or Directory</a></td>
+            <td><a href="tool/builtin/schemas/fs_delete.json">Delete File Or Directory</a></td>
             <td>Deletes a file or directory. Can delete directories recursively if explicitly asked to.</td>
         </tr>
     </tbody>
