@@ -22,9 +22,6 @@ type promptController interface {
 
 func (c *Cli) processScriptPrompt(ctx context.Context) error {
 	config := bootstrap.GetConfig(ctx)
-	if !bootstrap.IsScript(ctx) {
-		return nil
-	}
 
 	c.mode = PrChat
 

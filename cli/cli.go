@@ -52,7 +52,7 @@ func (c *Cli) Init(ctx context.Context) error {
 	}
 
 	var script string
-	if config.Startup.Script != "" {
+	if bootstrap.IsScript(ctx) {
 		s, err := readScript(config.Startup.Script)
 		if err != nil {
 			return err
@@ -85,15 +85,11 @@ func (c *Cli) Run(ctx context.Context) error {
 
 	cancelThisContext := cancelOnSigTerm()
 
-	{
+	if bootstrap.IsScript(ctx) {
 		ctx := cancelThisContext(ctx)
 
 		if err := c.processScriptPrompt(ctx); err != nil {
-			if errors.Is(err, io.EOF) || errorsx.IsCanceled(err) {
-				return nil
-			} else {
-				return err
-			}
+			return err
 		}
 	}
 
