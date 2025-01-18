@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/msg"
 	"github.com/umk/phishell/prompt"
+	"github.com/umk/phishell/prompt/msg"
 )
 
 type HttpOutputParams struct {

@@ -5,8 +5,8 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/msg"
 	"github.com/umk/phishell/prompt/client"
+	"github.com/umk/phishell/prompt/msg"
 )
 
 type SummaryPromptParams struct {
