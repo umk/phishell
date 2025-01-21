@@ -19,8 +19,8 @@ type Context struct {
 type backgroundJob struct {
 	args execx.Arguments
 
-	process *host.ToolProcess // TODO: make a weak pointer
-	info    *host.ToolProcessInfo
+	process *host.Provider
+	info    *host.ProviderInfo
 
 	startedAt time.Time
 }
@@ -64,7 +64,7 @@ func (c *Context) refreshJobs() {
 	}
 
 	for pid, job := range c.jobs {
-		if job.info.Status == host.TsCompleted || job.info.Status == host.TsFailed {
+		if job.info.Status == host.PsCompleted || job.info.Status == host.PsFailed {
 			// Leave only the most recent failed or completed job for diagnostic purposes
 			if failedOrCompl.job == nil || failedOrCompl.job.startedAt.Compare(job.startedAt) < 0 {
 				failedOrCompl.pid, failedOrCompl.job = pid, job

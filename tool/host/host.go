@@ -1,89 +1,96 @@
 package host
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"sync"
 
 	"github.com/openai/openai-go"
+	"github.com/umk/phishell/tool/host/process"
 	"github.com/umk/phishell/util/execx"
 )
 
 type Host struct {
 	mu sync.Mutex
 
-	processes []*ToolProcess
-	tools     map[string]*processTool
+	// Indicates whether host termination was initiated, so no new
+	// providers can be executed.
+	terminated bool
 
+	providers []*Provider
+	tools     any // either tools map or error
+
+	// Counts running providers to wait before close the host.
 	wg sync.WaitGroup
 }
 
-type processTool struct {
-	Process *ToolProcess
-	Tool    openai.ChatCompletionToolParam
+type toolsMap = map[string]*providerTool
+
+type providerTool struct {
+	provider *Provider
+	param    openai.ChatCompletionToolParam
 }
 
 func NewHost() *Host {
-	return &Host{tools: make(map[string]*processTool)}
+	return &Host{tools: make(map[string]*providerTool)}
 }
 
-func (h *Host) Execute(ctx context.Context, c *execx.Cmd) (*ToolProcess, error) {
-	cmd := c.Command()
+func (h *Host) Execute(c *execx.Cmd) (*Provider, error) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
 
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return nil, fmt.Errorf("failed to pipe Stdin: %w", err)
+	if h.terminated {
+		return nil, errors.New("host is terminated")
 	}
 
-	stdout, err := cmd.StdoutPipe()
+	// Start provider process and create provider
+	cmd := c.Command()
+
+	pr, err := process.New(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to pipe Stdout: %w", err)
+		return nil, err
 	}
 
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("failed to start process: %w", err)
 	}
 
-	p := &ToolProcess{
-		host: h,
-
-		cmd:   cmd,
-		stdin: stdin,
-
-		requests: make(map[string]chan<- any),
-
-		Tools: make(map[string]openai.ChatCompletionToolParam),
-		Info: &ToolProcessInfo{
-			Status: TsInitializing,
+	p := &Provider{
+		Info: &ProviderInfo{
+			Status: PsInitializing,
 		},
+		process: pr,
 	}
 
-	if err := p.initialize(ctx, stdout); err != nil {
-		p.Terminate(ctx, TsFailed, err.Error())
-		return nil, err
-	}
-
-	h.add(p)
-
-	h.wg.Add(1)
+	// Register created provider in the host
+	h.providerAdd(p)
 
 	go func() {
 		p.Wait()
-		h.wg.Done()
+
+		h.mu.Lock()
+		defer h.mu.Unlock()
+
+		h.providerDel(p)
 	}()
+
+	if err := p.initialize(); err != nil {
+		p.Terminate(PsFailed, err.Error())
+		return nil, err
+	}
 
 	return p, nil
 }
 
-func (h *Host) Close(ctx context.Context) error {
+func (h *Host) Close() error {
 	go func() {
 		h.mu.Lock()
 		defer h.mu.Unlock()
 
-		for _, process := range h.processes {
-			if process.Info.Status == TsRunning {
-				go process.Terminate(ctx, TsCompleted, "")
-			}
+		h.terminated = true
+
+		for _, p := range h.providers {
+			go p.Terminate(PsCompleted, "host terminated")
 		}
 	}()
 

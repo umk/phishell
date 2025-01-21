@@ -27,6 +27,11 @@ func NewThread(
 	client *bootstrap.ClientRef,
 	host *host.Host,
 ) (*Thread, error) {
+	tools, err := host.Tools()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Thread{
 		history: Clone(history),
 
@@ -35,7 +40,7 @@ func NewThread(
 
 		// Save for consistency across the rounds of LLM calls even if some of
 		// the tools become unavailable.
-		tools: host.Tools(),
+		tools: tools,
 	}, nil
 }
 

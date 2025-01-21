@@ -141,7 +141,7 @@ func (c *ToolRunner) getToolHandler(toolCall *openai.ChatCompletionMessageToolCa
 }
 
 func (c *ToolRunner) processError(err error) string {
-	return fmt.Sprintf("Error calling function: %s", err)
+	return fmt.Sprintf("Error calling function: %v", err)
 }
 
 func confirmToolCall(ctx context.Context, h *ToolRunnerHandler) error {

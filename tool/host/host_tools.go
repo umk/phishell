@@ -12,19 +12,30 @@ import (
 	"github.com/umk/phishell/tool/builtin"
 )
 
-func (h *Host) Tools() []openai.ChatCompletionToolParam {
-	var r []openai.ChatCompletionToolParam
+func (h *Host) Tools() ([]openai.ChatCompletionToolParam, error) {
+	tools, err := h.getProviderTools()
+	if err != nil {
+		return nil, err
+	}
 
-	for _, tool := range h.tools {
-		r = append(r, tool.Tool)
+	r := make([]openai.ChatCompletionToolParam, 0, len(tools))
+
+	// The tools map is immutable and can be accessed concurrently
+	for _, tool := range tools {
+		r = append(r, tool.param)
 	}
 
 	r = append(r, builtin.Tools...)
 
-	return r
+	return r, nil
 }
 
 func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handler, error) {
+	tools, err := h.getProviderTools()
+	if err != nil {
+		return nil, err
+	}
+
 	wd, err := os.Getwd()
 	if err != nil {
 		return nil, fmt.Errorf("cannot get working directory: %w", err)
@@ -45,58 +56,71 @@ func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handle
 	}
 
 	// The tools map is immutable and can be accessed concurrently
-	t, ok := h.tools[f.Name]
+	t, ok := tools[f.Name]
 	if !ok {
 		return nil, fmt.Errorf("no handler registered for %s", f.Name)
 	}
 
-	return &HostedToolHandler{
-		process: t.Process,
-		req: &provider.ToolRequest{
-			CallID: uuid.NewString(),
-			Function: provider.ToolRequestFunction{
-				Name:      f.Name,
-				Arguments: f.Arguments,
-			},
-			Context: provider.ToolRequestContext{
-				Dir: wd,
-			},
+	req := &provider.ToolRequest{
+		CallID: uuid.NewString(),
+		Function: provider.ToolRequestFunction{
+			Name:      f.Name,
+			Arguments: f.Arguments,
 		},
+		Context: provider.ToolRequestContext{
+			Dir: wd,
+		},
+	}
+
+	return &HostedToolHandler{
+		provider: t.provider,
+		req:      req,
 	}, nil
 }
 
-func (h *Host) add(p *ToolProcess) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	h.processes = append(h.processes, p)
+func (h *Host) providerAdd(p *Provider) {
+	h.providers = append(h.providers, p)
 
 	h.refreshTools()
+
+	h.wg.Add(1)
 }
 
-func (h *Host) delete(p *ToolProcess) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
-
-	h.processes = slices.DeleteFunc(h.processes, func(current *ToolProcess) bool {
+func (h *Host) providerDel(p *Provider) {
+	h.providers = slices.DeleteFunc(h.providers, func(current *Provider) bool {
 		return current == p
 	})
 
 	h.refreshTools()
+
+	h.wg.Done()
+}
+
+func (h *Host) getProviderTools() (toolsMap, error) {
+	if err, ok := h.tools.(error); ok {
+		return nil, err
+	}
+
+	return h.tools.(toolsMap), nil
 }
 
 func (f *Host) refreshTools() {
-	tools := make(map[string]*processTool)
+	tools := make(map[string]*providerTool)
 
-	for _, p := range f.processes {
-		if p.Info.Status != TsRunning {
+	for _, p := range f.providers {
+		if p.Info.Status != PsRunning {
 			continue
 		}
 
-		for k, v := range p.Tools {
-			tools[k] = &processTool{
-				Process: p,
-				Tool:    v,
+		for k, v := range p.process.Tools() {
+			if _, ok := tools[k]; ok {
+				f.tools = fmt.Errorf("duplicate exports of the tool: %s", k)
+				return
+			} else {
+				tools[k] = &providerTool{
+					provider: p,
+					param:    v,
+				}
 			}
 		}
 	}

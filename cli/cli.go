@@ -81,7 +81,7 @@ func (c *Cli) Init(ctx context.Context) error {
 }
 
 func (c *Cli) Run(ctx context.Context) error {
-	defer c.session.Host.Close(ctx)
+	defer c.session.Host.Close()
 
 	cancelThisContext := cancelOnSigTerm()
 

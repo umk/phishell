@@ -24,16 +24,16 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 		Env:  append(os.Environ(), "PHI_SHELL=1"),
 	}
 
-	pr, err := c.context.session.Host.Execute(ctx, &cmd)
+	p, err := c.context.session.Host.Execute(&cmd)
 	if err != nil {
 		return err
 	}
 
-	pid := pr.Pid()
+	pid := p.Process().Cmd().Process.Pid
 	c.context.jobs[pid] = &backgroundJob{
 		args:      args,
-		process:   pr,
-		info:      pr.Info,
+		process:   p,
+		info:      p.Info,
 		startedAt: time.Now(),
 	}
 

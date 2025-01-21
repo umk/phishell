@@ -20,7 +20,7 @@ func GetOrReadKey(profile string) (string, error) {
 		if err == keyring.ErrNotFound {
 			return ReadKeyAndUpdate(profile, true)
 		} else {
-			termx.Error.Printf("cannot read from keyring: %s\n", err)
+			termx.Error.Printf("cannot read from keyring: %v\n", err)
 			return ReadKey(profile, true)
 		}
 	}
@@ -36,7 +36,7 @@ func ReadKeyAndUpdate(profile string, force bool) (string, error) {
 
 	if k != "" {
 		if err := keyring.Set(keyringAppName, profile, k); err != nil {
-			termx.Error.Printf("cannot write to keyring: %s\n", err)
+			termx.Error.Printf("cannot write to keyring: %v\n", err)
 		}
 	}
 

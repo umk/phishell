@@ -113,7 +113,7 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 			Output:      output,
 		}
 	} else if bootstrap.IsDebug(ctx) {
-		termx.Muted.Printf("(error) %s\n", err)
+		termx.Muted.Printf("(error) %v\n", err)
 	}
 
 	return nil

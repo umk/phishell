@@ -7,12 +7,12 @@ import (
 )
 
 type HostedToolHandler struct {
-	process *ToolProcess
-	req     *provider.ToolRequest
+	provider *Provider
+	req      *provider.ToolRequest
 }
 
 func (h *HostedToolHandler) Execute(ctx context.Context) (any, error) {
-	res, err := h.process.Post(h.req)
+	res, err := h.provider.process.Post(h.req)
 	if err != nil {
 		return nil, err
 	}
