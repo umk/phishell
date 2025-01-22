@@ -108,7 +108,7 @@ func (f *Host) refreshTools() {
 	tools := make(map[string]*providerTool)
 
 	for _, p := range f.providers {
-		if p.Info.Status != PsRunning {
+		if p.info.Status != PsRunning {
 			continue
 		}
 

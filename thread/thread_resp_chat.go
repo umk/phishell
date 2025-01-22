@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/openai/openai-go"
+	"github.com/umk/phishell/util/termx"
 )
 
 func (t *Thread) processChatMessage(response openai.ChatCompletionMessage) error {
@@ -13,7 +14,7 @@ func (t *Thread) processChatMessage(response openai.ChatCompletionMessage) error
 
 	t.history.Messages = append(t.history.Messages, response)
 
-	fmt.Println(response.Content)
+	termx.Response.Println(response.Content)
 
 	return nil
 }

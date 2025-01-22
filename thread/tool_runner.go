@@ -154,7 +154,7 @@ func confirmToolCall(ctx context.Context, h *ToolRunnerHandler) error {
 	descr, _ := tool.Describe(ctx, h.handler)
 
 	if descr != "" {
-		fmt.Println(descr)
+		termx.Action.Println(descr)
 	} else {
 		s := strings.ToLower(t[0].String())
 		if _, ok := pureFunctionNames[s]; ok {
@@ -163,7 +163,7 @@ func confirmToolCall(ctx context.Context, h *ToolRunnerHandler) error {
 
 		dn := strings.ToLower(stringsx.DisplayName(t))
 
-		fmt.Printf("Running %s\n", dn)
+		termx.Action.Printf("Running %s\n", dn)
 	}
 
 	k, err := termx.ReadKeyOrDefaultOf("Continue? (Y/n/x) ", 'y', 'n', 'x')

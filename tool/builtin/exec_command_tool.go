@@ -121,5 +121,5 @@ func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
 }
 
 func (h *ExecCommandToolHandler) Describe(ctx context.Context) (string, error) {
-	return h.arguments.CommandLine, nil
+	return fmt.Sprintf("Running: %s", h.arguments.CommandLine), nil
 }

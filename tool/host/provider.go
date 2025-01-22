@@ -3,6 +3,7 @@ package host
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os/exec"
 	"sync"
 	"sync/atomic"
@@ -11,7 +12,10 @@ import (
 
 	"github.com/umk/phishell/provider"
 	"github.com/umk/phishell/tool/host/process"
+	"github.com/umk/phishell/util/execx"
 )
+
+const RestartExitCode = 100
 
 type Provider struct {
 	init sync.Mutex
@@ -20,15 +24,19 @@ type Provider struct {
 	// requests can be made to underlying process.
 	terminated atomic.Bool
 
+	// A prototype of the process' command.
+	cmd *execx.Cmd
+
+	process *process.Process
+
 	// A pointer to provider info, which allows referencing provider
 	// info by the host consumers without holding reference to provider
 	// instance itself.
-	Info *ProviderInfo
-
-	process *process.Process
+	info *ProviderInfo
 }
 
 type ProviderInfo struct {
+	Pid           int
 	Status        ProviderStatus
 	StatusMessage string
 }
@@ -58,8 +66,8 @@ func (s ProviderStatus) String() string {
 	return ""
 }
 
-func (p *Provider) Process() *process.Process {
-	return p.process
+func (p *Provider) Info() *ProviderInfo {
+	return p.info
 }
 
 func (p *Provider) Post(req *provider.ToolRequest) (*provider.ToolResponse, error) {
@@ -79,6 +87,7 @@ func (p *Provider) Terminate(status ProviderStatus, message string) ProviderStat
 
 	// Signal for graceful shutdown
 	if err := c.Process.Signal(syscall.SIGTERM); err != nil {
+		log.Printf("process %d failed to terminate: %v\n", p.info.Pid, err)
 		return status
 	}
 
@@ -95,6 +104,7 @@ func (p *Provider) Terminate(status ProviderStatus, message string) ProviderStat
 		// Do nothing
 	case <-time.After(10 * time.Second):
 		// If timeout, force terminate the process
+		log.Printf("process %d timed out when terminating; sending SIGKILL\n", p.info.Pid)
 		c.Process.Signal(syscall.SIGKILL)
 	}
 
@@ -105,23 +115,35 @@ func (p *Provider) Wait() ProviderStatus {
 	var status ProviderStatus
 	var message string
 
-	if err := p.process.WaitOnce(); err != nil {
-		status = PsFailed
+	for {
+		if err := p.process.WaitOnce(); err != nil {
+			status = PsFailed
 
-		var exitErr *exec.ExitError
-		if errors.As(err, &exitErr) {
-			message = fmt.Sprintf("process exited with code %d", exitErr.ExitCode())
+			var exitErr *exec.ExitError
+			if errors.As(err, &exitErr) {
+				if exitErr.ExitCode() == RestartExitCode {
+					if err := p.restart(); err != nil {
+						message = fmt.Sprintf("error restarting provider: %v", err)
+					} else {
+						continue
+					}
+				} else {
+					message = fmt.Sprintf("process exited with code %d", exitErr.ExitCode())
+				}
+			} else {
+				message = fmt.Sprintf("failed to complete process: %v", err)
+			}
 		} else {
-			message = fmt.Sprintf("failed to complete process: %v", err)
+			status = PsCompleted
+			message = "process completed"
 		}
-	} else {
-		status = PsCompleted
-		message = "process completed"
+
+		break
 	}
 
 	p.finalize(status, message)
 
-	return p.Info.Status
+	return p.info.Status
 }
 
 func (p *Provider) initialize() error {
@@ -136,7 +158,7 @@ func (p *Provider) initialize() error {
 		return err
 	}
 
-	p.Info.Status = PsRunning
+	p.info.Status = PsRunning
 
 	go func() {
 		if err := p.process.Read(); err != nil {
@@ -154,13 +176,31 @@ func (p *Provider) finalize(status ProviderStatus, message string) (s ProviderSt
 	if p.terminated.Swap(true) {
 		// Just silently return as the process has already been finalized,
 		// possibly with a different message and status.
-		return p.Info.Status, false
+		return p.info.Status, false
 	}
 
-	p.Info.Status = status
-	p.Info.StatusMessage = message
+	p.info.Status = status
+	p.info.StatusMessage = message
+
+	log.Printf("process %d finalized with status %s: %s\n",
+		p.info.Pid, p.info.Status, p.info.StatusMessage)
 
 	p.process.Reset("provider terminated")
 
 	return status, true
+}
+
+func (p *Provider) restart() error {
+	pr, err := process.Start(p.cmd)
+	if err != nil {
+		return err
+	}
+
+	p.process = pr
+
+	if err := p.initialize(); err != nil {
+		return err
+	}
+
+	return nil
 }

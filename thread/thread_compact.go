@@ -3,7 +3,6 @@ package thread
 import (
 	"context"
 
-	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/prompt"
 	"github.com/umk/phishell/prompt/client"
 	"github.com/umk/phishell/prompt/msg"
@@ -15,9 +14,7 @@ func (t *Thread) compactHistory(ctx context.Context) error {
 		return nil
 	}
 
-	if bootstrap.IsDebug(ctx) {
-		termx.Muted.Println("(compaction)")
-	}
+	termx.Muted.Println("Compaction...")
 
 	summaryCompl, err := prompt.PromptSummary(ctx, &prompt.SummaryPromptParams{
 		Messages: t.history.Messages,
@@ -38,9 +35,7 @@ func (t *Thread) compactHistory(ctx context.Context) error {
 		return err
 	}
 
-	if bootstrap.IsDebug(ctx) {
-		termx.Muted.Println(summaryMsg)
-	}
+	termx.Muted.Println(summaryMsg)
 
 	c := client.Get(t.client)
 

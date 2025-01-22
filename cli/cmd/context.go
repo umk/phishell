@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"time"
-
 	"github.com/umk/phishell/cli/session"
 	"github.com/umk/phishell/tool/host"
 	"github.com/umk/phishell/util/execx"
@@ -13,7 +11,7 @@ type Context struct {
 
 	commands map[string]Command
 
-	jobs map[int]*backgroundJob
+	jobs []*backgroundJob
 }
 
 type backgroundJob struct {
@@ -21,8 +19,6 @@ type backgroundJob struct {
 
 	process *host.Provider
 	info    *host.ProviderInfo
-
-	startedAt time.Time
 }
 
 func NewContext(session *session.Session, debug bool) *Context {
@@ -30,7 +26,6 @@ func NewContext(session *session.Session, debug bool) *Context {
 		session: session,
 
 		commands: make(map[string]Command),
-		jobs:     make(map[int]*backgroundJob),
 	}
 
 	context.commands["attach"] = &AttachCommand{context: context}
@@ -57,25 +52,11 @@ func (c *Context) Command(name string) (Command, bool) {
 }
 
 func (c *Context) refreshJobs() {
-	current := make(map[int]*backgroundJob)
-	var failedOrCompl struct {
-		pid int
-		job *backgroundJob
-	}
-
-	for pid, job := range c.jobs {
-		if job.info.Status == host.PsCompleted || job.info.Status == host.PsFailed {
-			// Leave only the most recent failed or completed job for diagnostic purposes
-			if failedOrCompl.job == nil || failedOrCompl.job.startedAt.Compare(job.startedAt) < 0 {
-				failedOrCompl.pid, failedOrCompl.job = pid, job
-			}
-		} else {
-			current[pid] = job
+	current := make([]*backgroundJob, 0, len(c.jobs))
+	for _, bj := range c.jobs {
+		if bj.info.Status == host.PsRunning {
+			current = append(current, bj)
 		}
-	}
-
-	if failedOrCompl.job != nil {
-		current[failedOrCompl.pid] = failedOrCompl.job
 	}
 
 	c.jobs = current

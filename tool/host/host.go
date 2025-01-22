@@ -2,7 +2,6 @@ package host
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/openai/openai-go"
@@ -44,22 +43,19 @@ func (h *Host) Execute(c *execx.Cmd) (*Provider, error) {
 	}
 
 	// Start provider process and create provider
-	cmd := c.Command()
-
-	pr, err := process.New(cmd)
+	pr, err := process.Start(c)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("failed to start process: %w", err)
-	}
-
 	p := &Provider{
-		Info: &ProviderInfo{
+		cmd:     c,
+		process: pr,
+
+		info: &ProviderInfo{
+			Pid:    pr.Cmd().Process.Pid,
 			Status: PsInitializing,
 		},
-		process: pr,
 	}
 
 	// Register created provider in the host

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/umk/phishell/util/execx"
 )
@@ -29,15 +28,15 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 		return err
 	}
 
-	pid := p.Process().Cmd().Process.Pid
-	c.context.jobs[pid] = &backgroundJob{
-		args:      args,
-		process:   p,
-		info:      p.Info,
-		startedAt: time.Now(),
+	bj := &backgroundJob{
+		args:    args,
+		process: p,
+		info:    p.Info(),
 	}
 
-	fmt.Printf("started background job [%d]\n", pid)
+	c.context.jobs = append(c.context.jobs, bj)
+
+	fmt.Printf("started background job [%d]\n", bj.info.Pid)
 
 	return nil
 }

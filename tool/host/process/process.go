@@ -11,6 +11,7 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/provider"
+	"github.com/umk/phishell/util/execx"
 )
 
 type Process struct {
@@ -33,6 +34,21 @@ type Process struct {
 	requests map[string]chan<- any
 
 	tools map[string]openai.ChatCompletionToolParam
+}
+
+func Start(c *execx.Cmd) (*Process, error) {
+	cmd := c.Command()
+
+	pr, err := New(cmd)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cmd.Start(); err != nil {
+		return nil, fmt.Errorf("failed to start process: %w", err)
+	}
+
+	return pr, nil
 }
 
 func New(cmd *exec.Cmd) (*Process, error) {

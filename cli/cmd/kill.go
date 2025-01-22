@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strconv"
 
 	"github.com/umk/phishell/tool/host"
@@ -23,14 +24,17 @@ func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 		return err
 	}
 
-	cmd, ok := c.context.jobs[pid]
-	if !ok {
+	n := slices.IndexFunc(c.context.jobs, func(job *backgroundJob) bool {
+		return job.info.Pid == pid
+	})
+	if n == -1 {
 		return fmt.Errorf("no such job: %d", pid)
 	}
 
-	if cmd.process != nil {
-		cmd.process.Terminate(host.PsCompleted, "terminated by user")
-		cmd.process = nil
+	job := c.context.jobs[n]
+	if job.process != nil {
+		job.process.Terminate(host.PsCompleted, "terminated by user")
+		job.process = nil
 	}
 
 	c.context.refreshJobs()
