@@ -62,13 +62,15 @@ func runCli(ctx context.Context) error {
 }
 
 func setupLogging() (func(), error) {
-	logName := fmt.Sprintf("phishell.%d.log", os.Getpid())
+	logName := fmt.Sprintf("phishell.%d.*.log", os.Getpid())
 	f, err := os.CreateTemp("", logName)
 	if err != nil {
 		return func() {}, err
 	}
 
+	os.Setenv("PHI_LOG", f.Name())
 	log.SetOutput(f)
+
 	cleanup := func() {
 		f.Close()
 		os.Remove(f.Name())
