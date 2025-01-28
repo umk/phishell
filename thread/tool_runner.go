@@ -14,37 +14,6 @@ import (
 	"github.com/umk/phishell/util/termx"
 )
 
-var pureFunctionNames = map[string]bool{
-	"get":       true,
-	"read":      true,
-	"fetch":     true,
-	"retrieve":  true,
-	"compute":   true,
-	"calculate": true,
-	"find":      true,
-	"generate":  true,
-	"derive":    true,
-	"select":    true,
-	"estimate":  true,
-	"evaluate":  true,
-	"infer":     true,
-	"parse":     true,
-	"transform": true,
-	"collect":   true,
-	"validate":  true,
-	"map":       true,
-	"analyze":   true,
-	"compare":   true,
-	"predict":   true,
-	"query":     true,
-	"match":     true,
-	"search":    true,
-	"extract":   true,
-	"format":    true,
-	"filter":    true,
-	"convert":   true,
-}
-
 type ToolRunner struct {
 	host *host.Host
 
@@ -156,13 +125,7 @@ func confirmToolCall(ctx context.Context, h *ToolRunnerHandler) error {
 	if descr != "" {
 		termx.Action.Println(descr)
 	} else {
-		s := strings.ToLower(t[0].String())
-		if _, ok := pureFunctionNames[s]; ok {
-			return nil
-		}
-
 		dn := strings.ToLower(stringsx.DisplayName(t))
-
 		termx.Action.Printf("Running %s\n", dn)
 	}
 

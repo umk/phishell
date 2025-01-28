@@ -71,5 +71,5 @@ func (h *FsDeleteToolHandler) Execute(ctx context.Context) (any, error) {
 }
 
 func (h *FsDeleteToolHandler) Describe(ctx context.Context) (string, error) {
-	return fmt.Sprintf("Delete file: %s", h.arguments.Path), nil
+	return fmt.Sprintf("Deleting file: %s", h.arguments.Path), nil
 }

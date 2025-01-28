@@ -1,205 +1,194 @@
 package bootstrap
 
-import (
-	"errors"
-	"fmt"
-	"io/fs"
-	"os"
-	"path/filepath"
+// const configFileName = ".phishell.yaml"
 
-	"github.com/umk/phishell/util/fsx"
-	"github.com/umk/phishell/util/marshalx"
-)
+// type ConfigFile struct {
+// 	Default  *string                       `yaml:"default"`
+// 	Profiles map[string]*ConfigFileProfile `yaml:"profiles"`
+// }
 
-const configFileName = ".phishell.yaml"
+// type ConfigFileProfile struct {
+// 	Context ConfigFileProfileContext `yaml:"-"`
 
-type ConfigFile struct {
-	Default  *string                       `yaml:"default"`
-	Profiles map[string]*ConfigFileProfile `yaml:"profiles"`
-}
+// 	Preset *string `yaml:"preset"`
 
-type ConfigFileProfile struct {
-	Context ConfigFileProfileContext `yaml:"-"`
+// 	BaseURL string `yaml:"baseurl"`
+// 	Key     string `yaml:"key"`
+// 	Model   string `yaml:"model"`
 
-	Preset *string `yaml:"preset"`
+// 	Prompt *ConfigFilePrompt `yaml:"prompt"`
 
-	BaseURL string `yaml:"baseurl"`
-	Key     string `yaml:"key"`
-	Model   string `yaml:"model"`
+// 	Retries        int `yaml:"retries"`
+// 	Concurrency    int `yaml:"concurrency"`
+// 	CompactionToks int `yaml:"compactionToks"`
+// }
 
-	Prompt *ConfigFilePrompt `yaml:"prompt"`
+// type ConfigFileProfileContext struct {
+// 	IsGlobal bool   // Indicates whether profile came from a global config
+// 	Dir      string // Directory where the config is located
+// }
 
-	Retries        int `yaml:"retries"`
-	Concurrency    int `yaml:"concurrency"`
-	CompactionToks int `yaml:"compactionToks"`
-}
+// type ConfigFilePrompt struct {
+// 	Path    *string `json:"path"`
+// 	Content *string `json:"content"`
+// }
 
-type ConfigFileProfileContext struct {
-	IsGlobal bool   // Indicates whether profile came from a global config
-	Dir      string // Directory where the config is located
-}
+// // loadConfigFiles reads configuration files and returns combined configuration.
+// func loadConfigFiles(currentDir string) (*ConfigFile, error) {
+// 	config := ConfigFile{Profiles: make(map[string]*ConfigFileProfile)}
 
-type ConfigFilePrompt struct {
-	Path    *string `json:"path"`
-	Content *string `json:"content"`
-}
+// 	currentDir = filepath.Clean(currentDir)
 
-// loadConfigFiles reads configuration files and returns combined configuration.
-func loadConfigFiles(currentDir string) (*ConfigFile, error) {
-	config := ConfigFile{Profiles: make(map[string]*ConfigFileProfile)}
+// 	homeDir, err := os.UserHomeDir()
+// 	if err != nil {
+// 		return nil, fmt.Errorf("cannot get user home directory: %w", err)
+// 	}
 
-	currentDir = filepath.Clean(currentDir)
+// 	homeConfigPath := filepath.Join(homeDir, configFileName)
+// 	if err := LoadConfigFile(homeConfigPath, &config, true); err != nil {
+// 		return nil, err
+// 	}
 
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("cannot get user home directory: %w", err)
-	}
+// 	if homeDir != currentDir {
+// 		dirConfigPath := filepath.Join(currentDir, configFileName)
+// 		if err := LoadConfigFile(dirConfigPath, &config, false); err != nil {
+// 			return nil, err
+// 		}
+// 	}
 
-	homeConfigPath := filepath.Join(homeDir, configFileName)
-	if err := LoadConfigFile(homeConfigPath, &config, true); err != nil {
-		return nil, err
-	}
+// 	return &config, nil
+// }
 
-	if homeDir != currentDir {
-		dirConfigPath := filepath.Join(currentDir, configFileName)
-		if err := LoadConfigFile(dirConfigPath, &config, false); err != nil {
-			return nil, err
-		}
-	}
+// // LoadConfigFile reads a YAML configuration file and updates combined config.
+// func LoadConfigFile(path string, config *ConfigFile, isGlobal bool) error {
+// 	data, err := os.ReadFile(path)
+// 	if err != nil {
+// 		// If the file does not exist, skip without error
+// 		if errors.Is(err, fs.ErrNotExist) {
+// 			return nil
+// 		}
+// 		return fmt.Errorf("cannot read %s: %w", path, err)
+// 	}
 
-	return &config, nil
-}
+// 	var current ConfigFile
+// 	if err := marshalx.UnmarshalYAMLStruct(data, &current); err != nil {
+// 		return fmt.Errorf("cannot parse YAML: %w", err)
+// 	}
 
-// LoadConfigFile reads a YAML configuration file and updates combined config.
-func LoadConfigFile(path string, config *ConfigFile, isGlobal bool) error {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		// If the file does not exist, skip without error
-		if errors.Is(err, fs.ErrNotExist) {
-			return nil
-		}
-		return fmt.Errorf("cannot read %s: %w", path, err)
-	}
+// 	// Remove default config profile if profile in current file overrides
+// 	// the profile config in the file, where this default was defined.
+// 	if config.Default != nil {
+// 		if _, ok := current.Profiles[*config.Default]; ok {
+// 			config.Default = nil
+// 		}
+// 	}
 
-	var current ConfigFile
-	if err := marshalx.UnmarshalYAMLStruct(data, &current); err != nil {
-		return fmt.Errorf("cannot parse YAML: %w", err)
-	}
+// 	// Copy settings from current config to combined one.
 
-	// Remove default config profile if profile in current file overrides
-	// the profile config in the file, where this default was defined.
-	if config.Default != nil {
-		if _, ok := current.Profiles[*config.Default]; ok {
-			config.Default = nil
-		}
-	}
+// 	if current.Default != nil {
+// 		config.Default = current.Default
+// 	}
 
-	// Copy settings from current config to combined one.
+// 	for k, v := range current.Profiles {
+// 		v.Context = ConfigFileProfileContext{
+// 			IsGlobal: isGlobal,
+// 			Dir:      filepath.Dir(path),
+// 		}
 
-	if current.Default != nil {
-		config.Default = current.Default
-	}
+// 		config.Profiles[k] = v
+// 	}
 
-	for k, v := range current.Profiles {
-		v.Context = ConfigFileProfileContext{
-			IsGlobal: isGlobal,
-			Dir:      filepath.Dir(path),
-		}
+// 	return nil
+// }
 
-		config.Profiles[k] = v
-	}
+// func setServiceFromProfileOrPreset(target *ConfigService, source *ConfigFileProfile) error {
+// 	if source.Preset != nil {
+// 		preset, ok := presets[*source.Preset]
+// 		if !ok {
+// 			return fmt.Errorf("preset not found: %s", *source.Preset)
+// 		}
 
-	return nil
-}
+// 		if err := setServiceFromProfile(target, &preset); err != nil {
+// 			return err
+// 		}
+// 	}
 
-func setServiceFromProfileOrPreset(target *ConfigService, source *ConfigFileProfile) error {
-	if source.Preset != nil {
-		preset, ok := presets[*source.Preset]
-		if !ok {
-			return fmt.Errorf("preset not found: %s", *source.Preset)
-		}
+// 	if err := setServiceFromProfile(target, source); err != nil {
+// 		return err
+// 	}
 
-		if err := setServiceFromProfile(target, &preset); err != nil {
-			return err
-		}
-	}
+// 	if source.Retries > 0 {
+// 		target.Retries = source.Retries
+// 	}
 
-	if err := setServiceFromProfile(target, source); err != nil {
-		return err
-	}
+// 	return nil
+// }
 
-	if source.Retries > 0 {
-		target.Retries = source.Retries
-	}
+// func setServiceFromProfile(target *ConfigService, source *ConfigFileProfile) error {
+// 	if source.BaseURL != "" {
+// 		target.BaseURL = source.BaseURL
+// 	}
+// 	if source.Key != "" {
+// 		target.Key.Value = source.Key
+// 		target.Key.Source = CfConfigFile
+// 	}
+// 	if source.Model != "" {
+// 		target.Model = source.Model
+// 	}
 
-	return nil
-}
+// 	prompt, err := getServicePrompt(source)
+// 	if err != nil {
+// 		return err
+// 	}
 
-func setServiceFromProfile(target *ConfigService, source *ConfigFileProfile) error {
-	if source.BaseURL != "" {
-		target.BaseURL = source.BaseURL
-	}
-	if source.Key != "" {
-		target.Key.Value = source.Key
-		target.Key.Source = CfConfigFile
-	}
-	if source.Model != "" {
-		target.Model = source.Model
-	}
+// 	if prompt != "" {
+// 		target.Prompt = prompt
+// 	}
 
-	prompt, err := getServicePrompt(source)
-	if err != nil {
-		return err
-	}
+// 	if source.Concurrency > 0 {
+// 		target.Concurrency = source.Concurrency
+// 	}
 
-	if prompt != "" {
-		target.Prompt = prompt
-	}
+// 	if source.CompactionToks > 0 {
+// 		target.CompactionToks = source.CompactionToks
+// 	}
 
-	if source.Concurrency > 0 {
-		target.Concurrency = source.Concurrency
-	}
+// 	return nil
+// }
 
-	if source.CompactionToks > 0 {
-		target.CompactionToks = source.CompactionToks
-	}
+// func getServicePrompt(source *ConfigFileProfile) (string, error) {
+// 	if source.Prompt == nil {
+// 		return "", nil
+// 	}
 
-	return nil
-}
+// 	if source.Prompt.Content != nil {
+// 		return *source.Prompt.Content, nil
+// 	}
 
-func getServicePrompt(source *ConfigFileProfile) (string, error) {
-	if source.Prompt == nil {
-		return "", nil
-	}
+// 	if source.Prompt.Path != nil {
+// 		p := *source.Prompt.Path
 
-	if source.Prompt.Content != nil {
-		return *source.Prompt.Content, nil
-	}
+// 		if source.Context.IsGlobal {
+// 			p = fsx.Resolve(source.Context.Dir, p)
+// 		} else {
+// 			if filepath.IsAbs(p) {
+// 				return "", errors.New("prompt path must be relative")
+// 			}
 
-	if source.Prompt.Path != nil {
-		p := *source.Prompt.Path
+// 			if fsx.EscapesBaseDir(p) {
+// 				return "", errors.New("prompt file path escapes the root directory")
+// 			}
 
-		if source.Context.IsGlobal {
-			p = fsx.Resolve(source.Context.Dir, p)
-		} else {
-			if filepath.IsAbs(p) {
-				return "", errors.New("prompt path must be relative")
-			}
+// 			p = filepath.Join(source.Context.Dir, p)
+// 		}
 
-			if fsx.EscapesBaseDir(p) {
-				return "", errors.New("prompt file path escapes the root directory")
-			}
+// 		content, err := os.ReadFile(p)
+// 		if err != nil {
+// 			return "", err
+// 		}
 
-			p = filepath.Join(source.Context.Dir, p)
-		}
+// 		return string(content), nil
+// 	}
 
-		content, err := os.ReadFile(p)
-		if err != nil {
-			return "", err
-		}
-
-		return string(content), nil
-	}
-
-	return "", errors.New("neither path nor content are specified for prompt")
-}
+// 	return "", errors.New("neither path nor content are specified for prompt")
+// }

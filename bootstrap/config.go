@@ -17,6 +17,8 @@ type Config struct {
 	Version bool
 
 	Services []*ConfigService
+
+	Log string
 }
 
 type ConfigStartup struct {
@@ -69,6 +71,7 @@ func LoadConfig() (*Config, error) {
 	dirFlag := flag.String("dir", "", "base directory (default current directory)")
 	flag.Var(&serviceProfIds, "profile", "configuration profile")
 	debugFlag := flag.Bool("debug", false, "debug interactions")
+	logFlag := flag.String("log", "", "log file, pipe or domain socket")
 	versionFlag := flag.Bool("v", false, "show version and quit")
 
 	// Parse the flags
@@ -120,6 +123,8 @@ func LoadConfig() (*Config, error) {
 		Dir:     currentDir,
 		Debug:   *debugFlag,
 		Version: *versionFlag,
+
+		Log: *logFlag,
 	}
 
 	processedIds := make(map[string]bool)

@@ -61,3 +61,7 @@ func (h *FsReadToolHandler) Execute(ctx context.Context) (any, error) {
 
 	return string(f), nil
 }
+
+func (h *FsReadToolHandler) Describe(ctx context.Context) (string, error) {
+	return fmt.Sprintf("Reading file: %s", h.arguments.Path), nil
+}

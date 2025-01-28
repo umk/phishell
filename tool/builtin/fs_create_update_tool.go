@@ -78,7 +78,7 @@ func (h *FsCreateOrUpdateToolHandler) Describe(ctx context.Context) (string, err
 	c, err := os.ReadFile(h.path)
 	if err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
-			return fmt.Sprintf("Create file: %s", h.arguments.Path), nil
+			return fmt.Sprintf("Creating file: %s", h.arguments.Path), nil
 		}
 
 		return "", err
@@ -90,5 +90,5 @@ func (h *FsCreateOrUpdateToolHandler) Describe(ctx context.Context) (string, err
 	diffs := d.DiffMain(s, h.arguments.FileContent, false)
 	t := stringsx.RenderDiff(diffs)
 
-	return fmt.Sprintf("Update file: %s\n%s", h.arguments.Path, t), nil
+	return fmt.Sprintf("Updating file: %s\n%s", h.arguments.Path, t), nil
 }

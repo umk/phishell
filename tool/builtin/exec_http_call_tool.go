@@ -15,6 +15,7 @@ import (
 	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/marshalx"
+	"github.com/umk/phishell/util/termx"
 )
 
 var allowedHeaders = map[string]bool{
@@ -73,6 +74,14 @@ func NewExecHttpCallToolHandler(argsJSON string) (*ExecHttpCallToolHandler, erro
 }
 
 func (h *ExecHttpCallToolHandler) Execute(ctx context.Context) (any, error) {
+	if bootstrap.IsDebug(ctx) {
+		termx.Muted.Printf("(call) %s; method=%s url=%s\n",
+			ExecHttpCallToolName, h.arguments.Method, h.arguments.Url)
+		if h.arguments.Body != nil && len(*h.arguments.Body) > 0 {
+			termx.Muted.Println(*h.arguments.Body)
+		}
+	}
+
 	// Create the HTTP request
 	var body io.Reader
 	if h.arguments.Body != nil {

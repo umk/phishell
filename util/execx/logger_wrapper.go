@@ -109,8 +109,9 @@ func (w *outputWrapper) processOutput(p []byte) error {
 		w.incompl = nil
 	}
 
-	for i := 0; i < len(b); i++ {
+	for i := 0; i < len(b); {
 		if b[i] == '\n' {
+			i++
 			if i < len(b)-1 && b[i+1] == '\r' {
 				i++
 			}
@@ -125,6 +126,7 @@ func (w *outputWrapper) processOutput(p []byte) error {
 					w.cur.b.Reset()
 				}
 			}
+			i++
 		} else if _, width := utf8.DecodeRune(b[i:]); width > 1 {
 			if w.cur.len < w.maxLen {
 				w.cur.b.Write(b[i : i+width])
@@ -134,6 +136,7 @@ func (w *outputWrapper) processOutput(p []byte) error {
 					w.cur.b.Reset()
 				}
 			}
+			i += width
 		} else if !utf8.FullRune(b[i:]) {
 			w.incompl = b[i:]
 			break

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"os"
 
 	"github.com/umk/phishell/bootstrap"
@@ -20,17 +19,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	logCleanup, err := setupLogging()
-	if err != nil {
-		termx.Error.Printf("unable to create log file: %v\n", err)
-	}
-	defer logCleanup()
-
 	config, err := bootstrap.LoadConfig()
 	if err != nil {
 		termx.Error.Printf("error loading config: %v\n", err)
 		os.Exit(1)
 	}
+
+	l, err := setupLogging(config.Log)
+	if err != nil {
+		termx.Error.Printf("unable to create log file: %v\n", err)
+	}
+	defer l.Close()
 
 	if config.Version {
 		fmt.Println(version)
@@ -59,24 +58,6 @@ func runCli(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func setupLogging() (func(), error) {
-	logName := fmt.Sprintf("phishell.%d.*.log", os.Getpid())
-	f, err := os.CreateTemp("", logName)
-	if err != nil {
-		return func() {}, err
-	}
-
-	os.Setenv("PHI_LOG", f.Name())
-	log.SetOutput(f)
-
-	cleanup := func() {
-		f.Close()
-		os.Remove(f.Name())
-	}
-
-	return cleanup, nil
 }
 
 func setupContext(config *bootstrap.Config) context.Context {
