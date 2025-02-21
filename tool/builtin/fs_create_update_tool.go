@@ -13,7 +13,6 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/tool"
-	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/fsx"
 	"github.com/umk/phishell/util/marshalx"
 	"github.com/umk/phishell/util/stringsx"
@@ -46,7 +45,7 @@ func NewFsCreateOrUpdateToolHandler(argsJSON, baseDir string) (*FsCreateOrUpdate
 	var arguments FsCreateOrUpdateArguments
 	err := marshalx.UnmarshalJSONStruct([]byte(argsJSON), &arguments)
 	if err != nil {
-		return nil, errorsx.NewRetryableError(fmt.Sprintf("invalid arguments: %v", err))
+		return nil, fmt.Errorf("invalid arguments: %w", err)
 	}
 
 	return &FsCreateOrUpdateToolHandler{

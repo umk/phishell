@@ -7,9 +7,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/provider"
 	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/tool/builtin"
+	"github.com/umk/phishell/tool/host/provider"
 )
 
 func (h *Host) Tools() ([]openai.ChatCompletionToolParam, error) {
@@ -51,8 +51,6 @@ func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handle
 		return builtin.NewFsDeleteToolHandler(f.Arguments, wd)
 	case builtin.ExecCommandToolName:
 		return builtin.NewExecCommandToolHandler(f.Arguments, wd)
-	case builtin.ExecHttpCallToolName:
-		return builtin.NewExecHttpCallToolHandler(f.Arguments)
 	}
 
 	// The tools map is immutable and can be accessed concurrently
@@ -61,13 +59,13 @@ func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handle
 		return nil, fmt.Errorf("no handler registered for %s", f.Name)
 	}
 
-	req := &provider.ToolRequest{
+	req := &provider.Request{
 		CallID: uuid.NewString(),
-		Function: provider.ToolRequestFunction{
+		Function: provider.Function{
 			Name:      f.Name,
 			Arguments: f.Arguments,
 		},
-		Context: provider.ToolRequestContext{
+		Context: provider.Context{
 			Dir: wd,
 		},
 	}

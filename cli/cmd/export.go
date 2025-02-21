@@ -15,7 +15,7 @@ type ExportCommand struct{}
 
 func (c *ExportCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 1 {
-		return fmt.Errorf("usage: export <var>")
+		return fmt.Errorf("usage: %s", c.Usage())
 	}
 
 	if len(args) == 1 {
@@ -27,8 +27,12 @@ func (c *ExportCommand) Execute(ctx context.Context, args execx.Arguments) error
 	return nil
 }
 
+func (c *ExportCommand) Usage() string {
+	return "export <var>"
+}
+
 func (c *ExportCommand) Info() string {
-	return "export <var>: show or set value of an environment variable"
+	return "set value of an environment variable"
 }
 
 func (c *ExportCommand) showEnvVariables() {

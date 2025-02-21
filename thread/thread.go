@@ -3,6 +3,7 @@ package thread
 import (
 	"context"
 	"fmt"
+	"runtime"
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
@@ -15,25 +16,28 @@ import (
 
 type Thread struct {
 	history *History
+	frame   *MessagesFrame
 
 	client *bootstrap.ClientRef
 	host   *host.Host
 
 	tools []openai.ChatCompletionToolParam
+
+	printer *termx.Printer
 }
 
-func NewThread(
-	history *History,
-	client *bootstrap.ClientRef,
-	host *host.Host,
-) (*Thread, error) {
+func NewThread(history *History, client *bootstrap.ClientRef, host *host.Host) (*Thread, error) {
 	tools, err := host.Tools()
 	if err != nil {
 		return nil, err
 	}
 
+	h := history.Clone()
+	h.Frames = append(h.Frames, MessagesFrame{})
+
 	return &Thread{
-		history: Clone(history),
+		history: h,
+		frame:   &h.Frames[len(h.Frames)-1],
 
 		client: client,
 		host:   host,
@@ -41,14 +45,12 @@ func NewThread(
 		// Save for consistency across the rounds of LLM calls even if some of
 		// the tools become unavailable.
 		tools: tools,
+
+		printer: termx.NewPrinter(),
 	}, nil
 }
 
 func (t *Thread) Post(ctx context.Context, message string) (*History, error) {
-	if err := t.compactHistory(ctx); err != nil {
-		return nil, fmt.Errorf("history compaction failed: %w", err)
-	}
-
 	message, err := msg.FormatUserMessage(&msg.UserMessageParams{
 		Request: message,
 		Context: t.history.Pending,
@@ -57,37 +59,53 @@ func (t *Thread) Post(ctx context.Context, message string) (*History, error) {
 		return nil, err
 	}
 
-	t.history.Messages = append(t.history.Messages, openai.UserMessage(message))
+	t.frame.Messages = append(t.frame.Messages, openai.UserMessage(message))
+	t.frame.Request = message
+
 	t.history.Pending = nil
 
-	for retries := 0; ; {
-		message, err := prompt.PromptUser(ctx, &prompt.UserPromptParams{
-			Client:   t.client,
-			Messages: t.history.Messages,
+	sys, err := msg.FormatSystemMessage(&msg.SystemMessageParams{
+		Prompt: t.client.Config.Prompt,
+		OS:     runtime.GOOS,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	for {
+		response, err := prompt.PromptUser(ctx, &prompt.UserPromptParams{
+			Messages: t.history.Messages(openai.SystemMessage(sys)),
 			Tools:    t.tools,
+			Client:   t.client,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("service request failed: %w", err)
 		}
 
-		if len(message.Choices) > 0 {
-			response := message.Choices[0].Message
+		if len(response.Choices) == 0 {
+			return nil, fmt.Errorf("invalid response")
+		}
 
-			if len(response.ToolCalls) == 0 {
-				if err := t.processChatMessage(response); err != nil {
-					return nil, err
-				}
+		responseMsg, err := response.Message()
+		if err != nil {
+			return nil, nil
+		}
 
-				t.history.Toks = message.TotalToks()
-				return t.history, nil
+		t.frame.Toks += response.RequestToks() + response.ResponseToks()
+
+		if len(responseMsg.ToolCalls) == 0 {
+			if err := t.processChatMessage(responseMsg); err != nil {
+				return nil, err
 			}
 
-			if err := t.processToolMessage(ctx, response, &retries); err != nil {
-				if errorsx.IsCanceled(err) {
-					return nil, err
-				}
-				termx.Error.Println(err)
+			return t.history, nil
+		}
+
+		if err := t.processToolMessage(ctx, responseMsg); err != nil {
+			if errorsx.IsCanceled(err) {
+				return nil, err
 			}
+			termx.Error.Println(err)
 		}
 	}
 }

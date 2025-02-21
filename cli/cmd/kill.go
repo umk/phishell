@@ -16,7 +16,7 @@ type KillCommand struct {
 
 func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) != 1 {
-		return fmt.Errorf("usage: kill [pid]")
+		return fmt.Errorf("usage: %s", c.Usage())
 	}
 	pidStr := args[0]
 	pid, err := strconv.Atoi(pidStr)
@@ -24,26 +24,30 @@ func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 		return err
 	}
 
-	n := slices.IndexFunc(c.context.jobs, func(job *backgroundJob) bool {
-		return job.info.Pid == pid
+	n := slices.IndexFunc(c.context.providers, func(provider *providerRef) bool {
+		return provider.info.Pid == pid
 	})
 	if n == -1 {
-		return fmt.Errorf("no such job: %d", pid)
+		return fmt.Errorf("no such provider: %d", pid)
 	}
 
-	job := c.context.jobs[n]
-	if job.process != nil {
-		job.process.Terminate(host.PsCompleted, "terminated by user")
-		job.process = nil
+	provider := c.context.providers[n]
+	if provider.process != nil {
+		provider.process.Terminate(host.PsCompleted, "terminated by user")
+		provider.process = nil
 	}
 
-	c.context.refreshJobs()
+	c.context.providers.refresh()
 
 	fmt.Println("OK")
 
 	return nil
 }
 
+func (c *KillCommand) Usage() string {
+	return "kill [pid]"
+}
+
 func (k *KillCommand) Info() string {
-	return "kill [pid]: kill a background process with the given PID"
+	return "kill a tools provider with the given PID"
 }

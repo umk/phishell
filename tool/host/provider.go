@@ -10,12 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/umk/phishell/provider"
 	"github.com/umk/phishell/tool/host/process"
+	"github.com/umk/phishell/tool/host/provider"
 	"github.com/umk/phishell/util/execx"
 )
-
-const RestartExitCode = 100
 
 type Provider struct {
 	init sync.Mutex
@@ -70,7 +68,7 @@ func (p *Provider) Info() *ProviderInfo {
 	return p.info
 }
 
-func (p *Provider) Post(req *provider.ToolRequest) (*provider.ToolResponse, error) {
+func (p *Provider) Post(req *provider.Request) (*provider.Response, error) {
 	if !p.terminated.Load() {
 		return nil, errors.New("provider is terminated")
 	}
@@ -115,30 +113,18 @@ func (p *Provider) Wait() ProviderStatus {
 	var status ProviderStatus
 	var message string
 
-	for {
-		if err := p.process.WaitOnce(); err != nil {
-			status = PsFailed
+	if err := p.process.WaitOnce(); err != nil {
+		status = PsFailed
 
-			var exitErr *exec.ExitError
-			if errors.As(err, &exitErr) {
-				if exitErr.ExitCode() == RestartExitCode {
-					if err := p.restart(); err != nil {
-						message = fmt.Sprintf("error restarting provider: %v", err)
-					} else {
-						continue
-					}
-				} else {
-					message = fmt.Sprintf("process exited with code %d", exitErr.ExitCode())
-				}
-			} else {
-				message = fmt.Sprintf("failed to complete process: %v", err)
-			}
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
+			message = fmt.Sprintf("process exited with code %d", exitErr.ExitCode())
 		} else {
-			status = PsCompleted
-			message = "process completed"
+			message = fmt.Sprintf("failed to complete process: %v", err)
 		}
-
-		break
+	} else {
+		status = PsCompleted
+		message = "process completed"
 	}
 
 	p.finalize(status, message)
@@ -188,19 +174,4 @@ func (p *Provider) finalize(status ProviderStatus, message string) (s ProviderSt
 	p.process.Reset("provider terminated")
 
 	return status, true
-}
-
-func (p *Provider) restart() error {
-	pr, err := process.Start(p.cmd)
-	if err != nil {
-		return err
-	}
-
-	p.process = pr
-
-	if err := p.initialize(); err != nil {
-		return err
-	}
-
-	return nil
 }

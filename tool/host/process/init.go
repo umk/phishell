@@ -23,7 +23,7 @@ func (p *Process) Init() error {
 	select {
 	case err := <-init:
 		if err != nil {
-			return fmt.Errorf("failed to initialize tools: %w", err)
+			return fmt.Errorf("init failed: %w", err)
 		}
 	case <-time.After(10 * time.Second):
 		return errors.New("initialization timeout")

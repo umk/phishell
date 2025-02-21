@@ -6,15 +6,11 @@ import (
 	"io"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
 
-	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/cmd"
 	"github.com/umk/phishell/cli/session"
-	"github.com/umk/phishell/prompt/msg"
-	"github.com/umk/phishell/thread"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/termx"
 )
@@ -33,13 +29,11 @@ type Cli struct {
 	commands *cmd.Context
 }
 
-func NewCli(debug bool) *Cli {
-	mode := PrCommand
-
-	cli := &Cli{mode: mode}
+func NewCli() *Cli {
+	cli := &Cli{mode: PrCommand}
 
 	cli.session = session.NewSession()
-	cli.commands = cmd.NewContext(cli.session, debug)
+	cli.commands = cmd.NewContext(cli.session)
 
 	return cli
 }
@@ -51,32 +45,6 @@ func (c *Cli) Init(ctx context.Context) error {
 		return err
 	}
 
-	var script string
-	if bootstrap.IsScript(ctx) {
-		s, err := readScript(config.Startup.Script)
-		if err != nil {
-			return err
-		}
-
-		script = s
-	}
-
-	cr := bootstrap.GetClient(ctx)
-	message, err := msg.FormatSystemMessage(&msg.SystemMessageParams{
-		Prompt: cr.Config.Prompt,
-		Script: script,
-		OS:     runtime.GOOS,
-	})
-	if err != nil {
-		return err
-	}
-
-	c.session.History = &thread.History{
-		Messages: []openai.ChatCompletionMessageParamUnion{
-			openai.SystemMessage(message),
-		},
-	}
-
 	return nil
 }
 
@@ -84,14 +52,6 @@ func (c *Cli) Run(ctx context.Context) error {
 	defer c.session.Host.Close()
 
 	cancelThisContext := cancelOnSigTerm()
-
-	if bootstrap.IsScript(ctx) {
-		ctx := cancelThisContext(ctx)
-
-		if err := c.processScriptPrompt(ctx); err != nil {
-			return err
-		}
-	}
 
 	for {
 		ctx := cancelThisContext(ctx)

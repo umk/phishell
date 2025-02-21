@@ -26,25 +26,10 @@ type PreviousOut struct {
 }
 
 func NewSession() *Session {
-	session := &Session{}
-
-	session.Host = host.NewHost()
-
-	return session
-}
-
-func (s *Session) Chdir(dir string) error {
-	dir, err := s.Resolve(dir)
-	if err != nil {
-		return err
+	return &Session{
+		Host:    host.NewHost(),
+		History: new(thread.History),
 	}
-
-	err = os.Chdir(dir)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (s *Session) Resolve(path string) (string, error) {

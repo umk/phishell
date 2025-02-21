@@ -8,23 +8,23 @@ import (
 )
 
 type argumentsBuilder struct {
-	Arguments []Arguments
+	arguments []Arguments
 	current   *Arguments
 }
 
 func newArgumentsBuilder() *argumentsBuilder {
 	builder := &argumentsBuilder{
-		Arguments: []Arguments{nil},
+		arguments: []Arguments{nil},
 	}
-	builder.current = &builder.Arguments[0]
+	builder.current = &builder.arguments[0]
 
 	return builder
 }
 
 func (a *argumentsBuilder) addPlain(arg string) error {
 	if arg == "|" {
-		a.Arguments = append(a.Arguments, nil)
-		a.current = &a.Arguments[len(a.Arguments)-1]
+		a.arguments = append(a.arguments, nil)
+		a.current = &a.arguments[len(a.arguments)-1]
 		return nil
 	}
 

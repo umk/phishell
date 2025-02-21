@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 
 	"github.com/umk/phishell/bootstrap"
@@ -25,12 +26,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	l, err := setupLogging(config.Log)
-	if err != nil {
-		termx.Error.Printf("unable to create log file: %v\n", err)
-	}
-	defer l.Close()
-
 	if config.Version {
 		fmt.Println(version)
 		os.Exit(0)
@@ -47,7 +42,9 @@ func main() {
 }
 
 func runCli(ctx context.Context) error {
-	c := cli.NewCli(bootstrap.IsDebug(ctx))
+	c := cli.NewCli()
+
+	log.SetOutput(io.Discard)
 
 	if err := c.Init(ctx); err != nil {
 		return err

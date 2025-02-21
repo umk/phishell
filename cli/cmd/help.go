@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/umk/phishell/util/execx"
+	"github.com/umk/phishell/util/termx"
 )
 
 type HelpCommand struct {
@@ -16,11 +17,10 @@ type HelpCommand struct {
 
 func (c *HelpCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return fmt.Errorf("usage: help")
+		return fmt.Errorf("usage: %s", c.Usage())
 	}
 
 	var names []string
-
 	for name := range c.context.commands {
 		names = append(names, name)
 	}
@@ -31,17 +31,20 @@ func (c *HelpCommand) Execute(ctx context.Context, args execx.Arguments) error {
 
 	for _, name := range names {
 		command := c.context.commands[name]
-
-		info := fmt.Sprintf(" - %s", command.Info())
-
+		info := fmt.Sprintf(" - `%s` %s", command.Usage(), command.Info())
 		commands = append(commands, info)
 	}
 
-	fmt.Println(strings.Join(commands, "\n"))
+	printer := termx.NewPrinter()
+	printer.Printf("# Commands\n\n%s", strings.Join(commands, "\n"))
 
 	return nil
 }
 
+func (c *HelpCommand) Usage() string {
+	return "help"
+}
+
 func (c *HelpCommand) Info() string {
-	return "help: display the help message"
+	return "display the help message"
 }

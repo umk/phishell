@@ -14,7 +14,7 @@ type AttachCommand struct {
 
 func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: attach [cmd]")
+		return fmt.Errorf("usage: %s", c.Usage())
 	}
 
 	cmd := execx.Cmd{
@@ -28,19 +28,23 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 		return err
 	}
 
-	bj := &backgroundJob{
+	pr := &providerRef{
 		args:    args,
 		process: p,
 		info:    p.Info(),
 	}
 
-	c.context.jobs = append(c.context.jobs, bj)
+	c.context.providers = append(c.context.providers, pr)
 
-	fmt.Printf("started background job [%d]\n", bj.info.Pid)
+	fmt.Printf("started provider [%d]\n", pr.info.Pid)
 
 	return nil
 }
 
+func (c *AttachCommand) Usage() string {
+	return "attach [cmd]"
+}
+
 func (p *AttachCommand) Info() string {
-	return "attach [cmd]: run background process that provides tools"
+	return "run tools provider in background"
 }

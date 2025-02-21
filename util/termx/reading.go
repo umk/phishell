@@ -133,14 +133,3 @@ func ReadKeyOrDefaultOf(prompt string, def rune, others ...rune) (rune, error) {
 	fmt.Println(string(result)) // Echo the character and add a newline
 	return result, nil
 }
-
-// ReadSecret reads a secret from the terminal without echoing it.
-func ReadSecret(prompt string) (string, error) {
-	fmt.Print(prompt)
-	byteSecret, err := term.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Println() // Print a newline after the secret input.
-	if err != nil {
-		return "", err
-	}
-	return string(byteSecret), nil
-}

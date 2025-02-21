@@ -25,14 +25,20 @@ func (c *PushCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	return c.pushExec(ctx, args)
 }
 
+func (c *PushCommand) Usage() string {
+	return "push <cmd>"
+}
+
 func (c *PushCommand) Info() string {
-	return "push <cmd>: run non-interactive command and push result to chat history"
+	return "run non-interactive command and push result to chat history"
 }
 
 func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error {
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 
-	logger := execx.Log(cmd, 15000)
+	config := bootstrap.GetConfig(ctx)
+
+	logger := execx.Log(cmd, config.OutputBufSize)
 
 	exitCode, err := execx.Run(cmd)
 	if err != nil {
@@ -48,7 +54,7 @@ func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error 
 		return err
 	}
 
-	cr := bootstrap.GetClient(ctx)
+	cr := bootstrap.GetDefaultClient(ctx)
 	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: args.String(),
 		ExitCode:    exitCode,
@@ -75,10 +81,10 @@ func (c *PushCommand) pushPrevious(ctx context.Context) error {
 	session := c.context.session
 
 	if session.PreviousOut == nil {
-		return errors.New("no previous output to push")
+		return errors.New("no previous command output to push")
 	}
 
-	cr := bootstrap.GetClient(ctx)
+	cr := bootstrap.GetDefaultClient(ctx)
 	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
 		CommandLine: session.PreviousOut.CommandLine,
 		ExitCode:    session.PreviousOut.ExitCode,

@@ -25,13 +25,15 @@ type Client struct {
 func (c *Client) Completion(ctx context.Context, params openai.ChatCompletionNewParams) (
 	*openai.ChatCompletion, error,
 ) {
-	c.s.Acquire(ctx, 1)
+	if err := c.s.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
 	defer c.s.Release(1)
 
 	var compl *openai.ChatCompletion
 	err := c.Request(ctx, func(client *openai.Client) (err error) {
-		termx.SpinnerStart()
-		defer termx.SpinnerStop()
+		termx.Spinner.Start()
+		defer termx.Spinner.Stop()
 
 		compl, err = client.Chat.Completions.New(ctx, params)
 		return

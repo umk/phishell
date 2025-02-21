@@ -5,54 +5,32 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/umk/phishell/util/execx"
+	"github.com/go-playground/validator/v10"
 	"github.com/umk/phishell/util/flagx"
 )
 
 type Config struct {
-	Startup ConfigStartup
-
-	Dir     string
-	Debug   bool
-	Version bool
-
-	Services []*ConfigService
-
-	Log string
-}
-
-type ConfigStartup struct {
-	Script string
-	Prompt string
+	Dir           string `validate:"required"`
+	Debug         bool
+	Version       bool
+	Services      []*ConfigService `validate:"dive"`
+	OutputBufSize int
 }
 
 type ConfigService struct {
 	Profile string
 
-	BaseURL string
-	Key     ConfigValue[string]
-	Model   string
+	BaseURL string `validate:"required,url"`
+	Key     string `validate:"required"`
+	Model   string `validate:"required"`
 
 	Prompt string
 
-	Retries        int
-	Concurrency    int
-	CompactionToks int
-}
-
-type ConfigValue[V any] struct {
-	Value  V
-	Source ConfigSource
+	Concurrency int `validate:"required,min=1"`
+	ContextSize int `validate:"required,min=2000"`
 }
 
 type ConfigSource int
-
-const (
-	CfNone ConfigSource = iota
-	CfConfigFile
-	CfKeyChain
-	CfEnvironment
-)
 
 // LoadConfig reads configuration from flags, environment variables, and config files.
 func LoadConfig() (*Config, error) {
@@ -60,8 +38,6 @@ func LoadConfig() (*Config, error) {
 	flag.Usage = func() {
 		w := flag.CommandLine.Output()
 		fmt.Fprint(w, "Usage: phishell option...\n")
-		fmt.Fprint(w, "       phishell option... script-file\n")
-		fmt.Fprint(w, "       phishell option... script-file prompt\n")
 		fmt.Fprint(w, "Options:\n")
 		flag.PrintDefaults()
 	}
@@ -71,14 +47,12 @@ func LoadConfig() (*Config, error) {
 	dirFlag := flag.String("dir", "", "base directory (default current directory)")
 	flag.Var(&serviceProfIds, "profile", "configuration profile")
 	debugFlag := flag.Bool("debug", false, "debug interactions")
-	logFlag := flag.String("log", "", "log file, pipe or domain socket")
 	versionFlag := flag.Bool("v", false, "show version and quit")
 
 	// Parse the flags
 	flag.Parse()
 
-	args := execx.Arguments(flag.Args())
-	if len(args) > 2 {
+	if len(flag.Args()) > 0 {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -115,16 +89,11 @@ func LoadConfig() (*Config, error) {
 
 	// Initialize Config with default values
 	config := &Config{
-		Startup: ConfigStartup{
-			Script: args.Get(0),
-			Prompt: args.Get(1),
-		},
-
 		Dir:     currentDir,
 		Debug:   *debugFlag,
 		Version: *versionFlag,
 
-		Log: *logFlag,
+		OutputBufSize: 512 * 1024,
 	}
 
 	processedIds := make(map[string]bool)
@@ -140,12 +109,17 @@ func LoadConfig() (*Config, error) {
 		processedIds[id] = true
 	}
 
-	loadEnvVars(config)
-
 	for _, p := range config.Services {
 		if err := setServiceFromConfigFile(p, f); err != nil {
 			return nil, err
 		}
+	}
+
+	loadEnvVars(config)
+
+	v := validator.New()
+	if err := v.Struct(config); err != nil {
+		return nil, err
 	}
 
 	return config, nil
@@ -154,20 +128,11 @@ func LoadConfig() (*Config, error) {
 func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
 	profile, ok := source.Profiles[target.Profile]
 	if !ok {
-		return fmt.Errorf("profile not found: %s", target.Profile)
+		return fmt.Errorf("profile not found: %q", target.Profile)
 	}
 
 	if err := setServiceFromProfileOrPreset(target, profile); err != nil {
 		return err
-	}
-
-	if target.Key.Value == "" {
-		k, err := getServiceKey(target.Profile)
-		if err != nil {
-			return err
-		}
-
-		target.Key = k
 	}
 
 	return nil
@@ -175,10 +140,9 @@ func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
 
 func loadEnvVars(c *Config) {
 	for _, p := range c.Services {
-		if p.Key.Value == "" {
+		if p.Key == "" {
 			if v, ok := os.LookupEnv("PHI_KEY"); ok {
-				p.Key.Value = v
-				p.Key.Source = CfEnvironment
+				p.Key = v
 
 				os.Unsetenv("PHI_KEY")
 			}
@@ -186,24 +150,10 @@ func loadEnvVars(c *Config) {
 	}
 }
 
-func getServiceKey(profile string) (ConfigValue[string], error) {
-	k, err := GetOrReadKey(profile)
-	if err != nil {
-		return ConfigValue[string]{}, fmt.Errorf("failed to read secret: %w", err)
-	}
-
-	return ConfigValue[string]{
-		Source: CfKeyChain,
-		Value:  k,
-	}, nil
-}
-
 func createDefaultService(profile string) *ConfigService {
 	return &ConfigService{
 		Profile: profile,
 
-		Retries:        5,
-		Concurrency:    1,
-		CompactionToks: 2000,
+		Concurrency: 1,
 	}
 }

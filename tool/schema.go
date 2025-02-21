@@ -1,13 +1,13 @@
-package provider
+package tool
 
 type Tool struct {
 	// The type of the tool. Currently, only `function` is supported.
 	Type string `json:"type" validate:"required,oneof=function"`
 	// Description of the function.
-	Function *ToolFunction `json:"function,omitempty"`
+	Function *Function `json:"function,omitempty"`
 }
 
-type ToolFunction struct {
+type Function struct {
 	// The name of the function to be called. Must be a-z, A-Z, 0-9, or
 	// contain underscores and dashes, with a maximum length of 64.
 	Name string `json:"name" validate:"required"`

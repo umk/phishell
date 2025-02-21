@@ -1,10 +1,6 @@
 # 𝛗 shell
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/umk/phishell/provider.svg)](https://pkg.go.dev/github.com/umk/phishell/provider)
-
 **Phi Shell** is a command-line application designed to serve as a command processor with enhanced capabilities for integrating external tool providers and interacting with Large Language Models (LLMs). These tool providers are standalone programs created by users. Providers can be implemented in any programming language, taking advantage of thousands of libraries to enable features ranging from integrations with external systems to the implementation of sophisticated business logic. The host program communicates with tool providers through their `Stdin` and `Stdout`, reducing the need for extensive boilerplate code.
-
-Phi Shell is shipped with type declarations for the [Go](provider) programming language, allowing users to implement their tools with few imports and function calls.
 
 Phi Shell offers two distinct modes of operation:
 
@@ -163,18 +159,8 @@ The Basic Shell mode supports the following built-in commands:
             <td>Display the help message.</td>
         </tr>
         <tr valign="top">
-            <td><code>history</code></td>
-            <td>Display the chat messages history. Available only when running the Phi Shell with <code>-debug</code>
-                flag.</td>
-        </tr>
-        <tr valign="top">
-            <td><code>jobs</code></td>
-            <td>List attached background processes. Includes one terminated or failed background process, if any, for
-                diagnostic purposes.</td>
-        </tr>
-        <tr valign="top">
             <td><code>kill [pid]</code></td>
-            <td>Kill a background process with the given PID.</td>
+            <td>Kill a tool provider with the given PID.</td>
         </tr>
         <tr valign="top">
             <td><code>push &lt;cmd&gt;</code></td>
@@ -189,6 +175,10 @@ The Basic Shell mode supports the following built-in commands:
         <tr valign="top">
             <td><code>reset</code></td>
             <td>Reset chat history.</td>
+        </tr>
+        <tr valign="top">
+            <td><code>status</code></td>
+            <td>List attached tool providers.</td>
         </tr>
     </tbody>
 </table>
@@ -347,10 +337,6 @@ Phi Shell offers several basic tools to use with daily tasks. These tools are av
         <tr valign="top">
             <td><a href="tool/builtin/schemas/exec_command.json">Execute Command</a></td>
             <td>Executes a console command or chain of piped commands</td>
-        </tr>
-        <tr valign="top">
-            <td><a href="tool/builtin/schemas/exec_http_call.json">Send HTTP Request</a></td>
-            <td>Sends an HTTP request, given a URL, method, headers, query parameters and body of request</td>
         </tr>
         <tr valign="top">
             <td><a href="tool/builtin/schemas/fs_create_update.json">Create Or Update File</a></td>

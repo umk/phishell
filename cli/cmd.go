@@ -43,7 +43,7 @@ func (c *Cli) processCommand(ctx context.Context, content string) error {
 			return nil
 		}
 
-		cmd, err := execx.AllocArgs(args)
+		cmd, err := args.Cmd()
 		if err != nil {
 			return err
 		}
@@ -74,7 +74,7 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 
 	cmds := make([]*exec.Cmd, len(piped))
 	for i, p := range piped {
-		cmd, err := execx.AllocArgs(p)
+		cmd, err := p.Cmd()
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,8 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 		return err
 	}
 
-	logger := execx.Log(cmds[len(cmds)-1], 15000)
+	config := bootstrap.GetConfig(ctx)
+	logger := execx.Log(cmds[len(cmds)-1], config.OutputBufSize)
 
 	exitCode, err := execx.RunPipe(cmds)
 

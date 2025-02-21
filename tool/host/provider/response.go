@@ -1,6 +1,6 @@
 package provider
 
-type ToolResponse struct {
+type Response struct {
 	// ID of the tool call that this message is responding to.
 	CallID string `json:"call_id" validate:"required"`
 	// The contents of the tool response.

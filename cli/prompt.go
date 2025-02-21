@@ -9,7 +9,6 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/util/termx"
 	"golang.org/x/term"
 )
@@ -20,32 +19,8 @@ type promptController interface {
 	getNextMode(ctx context.Context, current PromptMode) PromptMode
 }
 
-func (c *Cli) processScriptPrompt(ctx context.Context) error {
-	config := bootstrap.GetConfig(ctx)
-
-	c.mode = PrChat
-
-	client := c.getClient(ctx)
-	p := strings.TrimSpace(config.Startup.Prompt)
-
-	if p == "" {
-		line, err := c.readLine(ctx, &promptScript{cli: c})
-		if err != nil {
-			return err
-		}
-
-		p = line
-	}
-
-	if p == "" {
-		p = "Proceed with the script execution"
-	}
-
-	return c.session.ProcessChat(ctx, client, p)
-}
-
 func (c *Cli) processPrompt(ctx context.Context) error {
-	line, err := c.readLine(ctx, &promptChat{cli: c})
+	line, err := c.readPrompt(ctx, &promptChat{cli: c})
 	if err != nil {
 		return err
 	}
@@ -61,13 +36,13 @@ func (c *Cli) processPrompt(ctx context.Context) error {
 		return c.processCommand(ctx, content)
 	case PrChat:
 		client := c.getClient(ctx)
-		return c.session.ProcessChat(ctx, client, content)
+		return c.session.Post(ctx, client, content)
 	}
 
 	return nil
 }
 
-func (c *Cli) readLine(ctx context.Context, contr promptController) (string, error) {
+func (c *Cli) readPrompt(ctx context.Context, contr promptController) (string, error) {
 	prompt := contr.getPrompt(ctx, c.mode)
 	hint := contr.getHint(ctx, c.mode)
 

@@ -8,5 +8,6 @@ import (
 
 type Command interface {
 	Execute(ctx context.Context, args execx.Arguments) error
+	Usage() string
 	Info() string
 }

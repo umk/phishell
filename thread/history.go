@@ -7,62 +7,33 @@ import (
 )
 
 type History struct {
-	Messages []openai.ChatCompletionMessageParamUnion
-
-	// Total number of tokens in the history. Doesn't include the
-	// pending messages.
-	Toks int
+	Frames []MessagesFrame
 
 	// A collection of pending messages to be delivered with the next
 	// user message.
 	Pending []string
 }
 
-// Reset returns only the part of the history that contains the system message, if any.
-func Reset(h *History) *History {
-	if s := getSystemMessage(h); s != nil {
-		return &History{
-			Messages: []openai.ChatCompletionMessageParamUnion{s},
-		}
-	}
+type MessagesFrame struct {
+	Request  string
+	Response string
 
-	return &History{}
+	Messages []openai.ChatCompletionMessageParamUnion
+
+	Toks int
 }
 
-func Clone(h *History) *History {
-	return &History{
-		Messages: slices.Clone(h.Messages),
-		Toks:     h.Toks,
+func (h *History) Messages(current ...openai.ChatCompletionMessageParamUnion) []openai.ChatCompletionMessageParamUnion {
+	var r []openai.ChatCompletionMessageParamUnion
+	for _, f := range h.Frames {
+		r = append(r, f.Messages...)
+	}
+	return append(r, current...)
+}
 
+func (h *History) Clone() *History {
+	return &History{
+		Frames:  slices.Clone(h.Frames),
 		Pending: slices.Clone(h.Pending),
 	}
-}
-
-func getSystemMessage(h *History) *openai.ChatCompletionSystemMessageParam {
-	if len(h.Messages) == 0 {
-		return nil
-	}
-
-	m := h.Messages[0]
-
-	if s, ok := m.(openai.ChatCompletionSystemMessageParam); ok {
-		return &s
-	}
-
-	return nil
-}
-
-// getSystemMessageSize gets the system message size in bytes.
-func getSystemMessageSize(h *History) int {
-	if s := getSystemMessage(h); s != nil {
-		var r int
-
-		for _, v := range s.Content.Value {
-			r += len(v.Text.Value)
-		}
-
-		return r
-	}
-
-	return 0
 }

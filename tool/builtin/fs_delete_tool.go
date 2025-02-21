@@ -10,7 +10,6 @@ import (
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/tool"
-	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/marshalx"
 	"github.com/umk/phishell/util/termx"
 )
@@ -41,7 +40,7 @@ func NewFsDeleteToolHandler(argsJSON, baseDir string) (*FsDeleteToolHandler, err
 	var arguments FsDeleteArguments
 	err := marshalx.UnmarshalJSONStruct([]byte(argsJSON), &arguments)
 	if err != nil {
-		return nil, errorsx.NewRetryableError(fmt.Sprintf("invalid arguments: %v", err))
+		return nil, fmt.Errorf("invalid arguments: %w", err)
 	}
 
 	return &FsDeleteToolHandler{

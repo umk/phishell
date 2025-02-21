@@ -1,8 +1,6 @@
 package execx
 
-import (
-	"strings"
-)
+import "strings"
 
 // ProcessOutput represents lines printed by a process.
 type ProcessOutput struct {

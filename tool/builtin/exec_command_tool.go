@@ -9,9 +9,8 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/response"
+	"github.com/umk/phishell/prompt/msg"
 	"github.com/umk/phishell/tool"
-	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/execx"
 	"github.com/umk/phishell/util/fsx"
 	"github.com/umk/phishell/util/marshalx"
@@ -46,7 +45,7 @@ func NewExecCommandToolHandler(argsJSON, baseDir string) (*ExecCommandToolHandle
 	var arguments ExecCommandArguments
 	err := marshalx.UnmarshalJSONStruct([]byte(argsJSON), &arguments)
 	if err != nil {
-		return nil, errorsx.NewRetryableError(fmt.Sprintf("invalid arguments: %v", err))
+		return nil, fmt.Errorf("invalid arguments: %w", err)
 	}
 
 	// Getting working directory
@@ -55,12 +54,12 @@ func NewExecCommandToolHandler(argsJSON, baseDir string) (*ExecCommandToolHandle
 	// Parsing command parameters
 	piped, err := execx.Parse(arguments.CommandLine)
 	if err != nil {
-		return nil, errorsx.NewRetryableError(fmt.Sprintf("invalid command line: %s", err))
+		return nil, fmt.Errorf("invalid command line: %w", err)
 	}
 
 	cmds := make([]*execx.Cmd, len(piped))
 	for i, p := range piped {
-		cmd, err := execx.AllocArgs(p)
+		cmd, err := p.Cmd()
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +93,8 @@ func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
 	}
 
 	// Running command
-	logger := execx.Log(cmds[len(cmds)-1], 15000)
+	config := bootstrap.GetConfig(ctx)
+	logger := execx.Log(cmds[len(cmds)-1], config.OutputBufSize)
 
 	exitCode, err := execx.RunPipe(cmds)
 	if err != nil {
@@ -107,11 +107,16 @@ func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
 		return nil, err
 	}
 
-	cr := bootstrap.GetClient(ctx)
-	output, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
-		CommandLine: h.arguments.CommandLine,
-		ExitCode:    exitCode,
-		Output:      processOut,
+	outputStr, tail, err := processOut.Get()
+	if err != nil {
+		return "", fmt.Errorf("invalid output: %w", err)
+	}
+
+	output, err := msg.FormatExecResponseMessage(&msg.ExecResponseMessageParams{
+		ExitCode: exitCode,
+		Output:   outputStr,
+		Tail:     tail,
+		Summary:  false,
 	})
 	if err != nil {
 		return nil, err

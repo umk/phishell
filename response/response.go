@@ -14,7 +14,7 @@ func mustSummarizeResp(cr *bootstrap.ClientRef, resp string) bool {
 	cl := client.Get(cr)
 	toks := float32(len(resp)) / cl.Samples.BytesPerTok()
 
-	return toks > float32(cr.Config.CompactionToks)/compactToSumRatio
+	return toks > float32(cr.Config.ContextSize)/compactToSumRatio
 }
 
 func getJSONObjectOrArray(s string) (string, bool) {

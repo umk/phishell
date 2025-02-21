@@ -3,12 +3,12 @@ package host
 import (
 	"context"
 
-	"github.com/umk/phishell/provider"
+	"github.com/umk/phishell/tool/host/provider"
 )
 
 type HostedToolHandler struct {
 	provider *Provider
-	req      *provider.ToolRequest
+	req      *provider.Request
 }
 
 func (h *HostedToolHandler) Execute(ctx context.Context) (any, error) {

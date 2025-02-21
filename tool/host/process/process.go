@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/provider"
+	"github.com/umk/phishell/tool/host/provider"
 	"github.com/umk/phishell/util/execx"
 )
 
@@ -45,7 +45,7 @@ func Start(c *execx.Cmd) (*Process, error) {
 	}
 
 	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("failed to start process: %w", err)
+		return nil, err
 	}
 
 	return pr, nil
@@ -92,7 +92,7 @@ func (p *Process) WaitOnce() error {
 }
 
 // Post sends the request to a tools provider and waits for a response.
-func (p *Process) Post(req *provider.ToolRequest) (*provider.ToolResponse, error) {
+func (p *Process) Post(req *provider.Request) (*provider.Response, error) {
 	ch, err := p.requestSend(req)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (p *Process) Post(req *provider.ToolRequest) (*provider.ToolResponse, error
 			return nil, errors.New("request canceled")
 		}
 		switch v := res.(type) {
-		case *provider.ToolResponse:
+		case *provider.Response:
 			return v, nil
 		case error:
 			return nil, v

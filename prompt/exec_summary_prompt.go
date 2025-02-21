@@ -26,8 +26,8 @@ func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (*C
 		return nil, err
 	}
 
-	message, err := msg.FormatExecSummaryMessage(
-		&msg.ExecSummaryMessageParams{
+	message, err := msg.FormatExecSummaryReqMessage(
+		&msg.ExecSummaryReqMessageParams{
 			CommandLine: params.CommandLine,
 			ExitCode:    params.ExitCode,
 			Output:      output,

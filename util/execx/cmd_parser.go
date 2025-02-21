@@ -1,7 +1,6 @@
 package execx
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strings"
@@ -81,27 +80,5 @@ func Parse(input string) ([]Arguments, error) {
 		}
 	}
 
-	return builder.Arguments, nil
-}
-
-func AllocArgs(args Arguments) (*Cmd, error) {
-	if len(args) == 0 {
-		return nil, errors.New("command line is empty")
-	}
-
-	i := 0
-
-	for ; i < len(args)-1; i++ {
-		part := args[i]
-		kv := strings.SplitN(part, "=", 2)
-		if len(kv) != 2 || !envVarRegex.MatchString(kv[0]) {
-			break
-		}
-	}
-
-	return &Cmd{
-		Env:  args[:i],
-		Cmd:  args[i],
-		Args: args[i+1:],
-	}, nil
+	return builder.arguments, nil
 }

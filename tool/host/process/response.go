@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/umk/phishell/provider"
+	"github.com/umk/phishell/tool/host/provider"
 	"github.com/umk/phishell/util/marshalx"
 )
 
@@ -28,7 +28,7 @@ func (p *Process) Read() error {
 }
 
 func (p *Process) processMessage(message []byte) error {
-	var res provider.ToolResponse
+	var res provider.Response
 	if err := marshalx.UnmarshalJSONStruct(message, &res); err != nil {
 		var syntaxErr *json.SyntaxError
 		if errors.As(err, &syntaxErr) {

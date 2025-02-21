@@ -7,32 +7,36 @@ import (
 	"github.com/briandowns/spinner"
 )
 
-var spinnerMu sync.Mutex
-
-var spinner_ = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
-
-var spinnerCount int
-
-func SpinnerStart() {
-	changeSpinner(1)
+var Spinner = spinnerCore{
+	spinner: spinner.New(spinner.CharSets[14], 100*time.Millisecond),
 }
 
-func SpinnerStop() {
-	changeSpinner(-1)
+type spinnerCore struct {
+	spinnerMu    sync.Mutex
+	spinner      *spinner.Spinner
+	spinnerCount int
 }
 
-func changeSpinner(d int) {
-	spinnerMu.Lock()
-	defer spinnerMu.Unlock()
+func (s *spinnerCore) Start() {
+	s.change(1)
+}
 
-	spinnerCount += d
+func (s *spinnerCore) Stop() {
+	s.change(-1)
+}
+
+func (s *spinnerCore) change(d int) {
+	s.spinnerMu.Lock()
+	defer s.spinnerMu.Unlock()
+
+	s.spinnerCount += d
 
 	switch {
-	case spinnerCount == 0:
-		spinner_.Stop()
-	case spinnerCount > 0:
-		spinner_.Start()
-	case spinnerCount < 0:
+	case s.spinnerCount == 0:
+		s.spinner.Stop()
+	case s.spinnerCount > 0:
+		s.spinner.Start()
+	case s.spinnerCount < 0:
 		panic("spinner count is out of range")
 	}
 }

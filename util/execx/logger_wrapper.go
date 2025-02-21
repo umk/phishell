@@ -110,13 +110,12 @@ func (w *outputWrapper) processOutput(p []byte) error {
 	}
 
 	for i := 0; i < len(b); {
-		if b[i] == '\n' {
-			i++
-			if i < len(b)-1 && b[i+1] == '\r' {
-				i++
-			}
-
+		if i < len(b)-1 && b[i] == '\r' && b[i+1] == '\n' {
 			w.appendCurrent()
+			i += 2
+		} else if b[i] == '\n' {
+			w.appendCurrent()
+			i++
 		} else if b[i] < utf8.RuneSelf {
 			if w.cur.len < w.maxLen {
 				w.cur.b.WriteByte(b[i])
@@ -169,7 +168,7 @@ func (w *outputWrapper) appendCurrent() {
 
 	// The list is truncated if it exceeds the max length.
 	var j int
-	for w.linesLen > w.maxLen {
+	for w.linesLen > w.maxLen || ((w.tail || j > 0) && j < len(w.lines) && len(w.lines[j]) == 0) {
 		w.linesLen -= len(w.lines[j]) + 1
 		w.lines[j] = ""
 
