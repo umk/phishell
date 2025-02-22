@@ -10,6 +10,7 @@ import (
 
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/cmd"
+	"github.com/umk/phishell/cli/persona"
 	"github.com/umk/phishell/cli/session"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/termx"
@@ -27,6 +28,7 @@ type Cli struct {
 
 	session  *session.Session
 	commands *cmd.Context
+	personas map[*bootstrap.Profile]*persona.Persona
 }
 
 func NewCli() *Cli {
@@ -44,6 +46,29 @@ func (c *Cli) Init(ctx context.Context) error {
 	if err := os.Chdir(config.Dir); err != nil {
 		return err
 	}
+
+	if err := c.initPersonas(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Cli) initPersonas(ctx context.Context) error {
+	personas := make(map[*bootstrap.Profile]*persona.Persona)
+
+	for _, profile := range bootstrap.GetProfiles(ctx) {
+		if profile.Config.IsPersona {
+			p := persona.New(profile)
+			if err := p.Init(ctx); err != nil {
+				return err
+			}
+
+			personas[profile] = p
+		}
+	}
+
+	c.personas = personas
 
 	return nil
 }
@@ -68,13 +93,13 @@ func (c *Cli) Run(ctx context.Context) error {
 	}
 }
 
-func (c *Cli) getClient(ctx context.Context) *bootstrap.ClientRef {
+func (c *Cli) getProfile(ctx context.Context) *bootstrap.Profile {
 	n := int(c.mode) - int(PrChat)
 	if n < 0 {
 		panic("prompt is not in a chat mode")
 	}
 
-	clients := bootstrap.GetClients(ctx)
+	clients := bootstrap.GetProfiles(ctx)
 
 	return clients[n]
 }

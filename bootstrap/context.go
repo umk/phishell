@@ -31,7 +31,7 @@ func GetVersion(ctx context.Context) string {
 
 // GetClient gets the default client to use outside of the chat context
 // where user can pick the client explicitly.
-func GetDefaultClient(ctx context.Context) *ClientRef {
+func GetDefaultClient(ctx context.Context) *Profile {
 	a := getApp(ctx)
 
 	if len(a.clients) == 0 {
@@ -41,9 +41,9 @@ func GetDefaultClient(ctx context.Context) *ClientRef {
 	return a.clients[0]
 }
 
-// GetClients gets the clients in the order the client profiles are
+// GetProfiles gets the clients in the order the client profiles are
 // specified in command line.
-func GetClients(ctx context.Context) []*ClientRef {
+func GetProfiles(ctx context.Context) []*Profile {
 	return getApp(ctx).clients
 }
 

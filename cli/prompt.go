@@ -35,8 +35,12 @@ func (c *Cli) processPrompt(ctx context.Context) error {
 	case PrCommand:
 		return c.processCommand(ctx, content)
 	case PrChat:
-		client := c.getClient(ctx)
-		return c.session.Post(ctx, client, content)
+		p := c.getProfile(ctx)
+		if p.Config.IsPersona {
+			return c.personas[p].Post(ctx, content)
+		} else {
+			return c.session.Post(ctx, p, content)
+		}
 	}
 
 	return nil

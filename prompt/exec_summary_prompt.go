@@ -12,7 +12,7 @@ import (
 )
 
 type ExecSummaryPromptParams struct {
-	Client      *bootstrap.ClientRef
+	Client      *bootstrap.Profile
 	CommandLine string
 	ExitCode    int
 	Output      execx.ProcessOutput

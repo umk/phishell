@@ -31,7 +31,7 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 	pr := &providerRef{
 		args:    args,
 		process: p,
-		info:    p.Info(),
+		info:    p.Info,
 	}
 
 	c.context.providers = append(c.context.providers, pr)

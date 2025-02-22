@@ -16,7 +16,7 @@ const (
 )
 
 type Client struct {
-	*bootstrap.ClientRef
+	*bootstrap.Profile
 
 	s       *semaphore.Weighted
 	Samples *Samples

@@ -1,0 +1,21 @@
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# Dependency directories
+node_modules/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# macOS directory attributes file
+.DS_Store
+
+# Typedoc output
+docs/
+
+# esbuild directories
+.esbuild/
+
+bin/
+dist/

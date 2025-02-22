@@ -9,9 +9,9 @@ import (
 
 var mu sync.Mutex
 
-var clients = make(map[*bootstrap.ClientRef]*Client)
+var clients = make(map[*bootstrap.Profile]*Client)
 
-func Get(clientRef *bootstrap.ClientRef) *Client {
+func Get(clientRef *bootstrap.Profile) *Client {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -19,7 +19,7 @@ func Get(clientRef *bootstrap.ClientRef) *Client {
 	if !ok {
 		s := semaphore.NewWeighted(int64(clientRef.Config.Concurrency))
 		client = &Client{
-			ClientRef: clientRef,
+			Profile: clientRef,
 
 			s:       s,
 			Samples: newSamples(samplesCount, defaultBytesPerTok),

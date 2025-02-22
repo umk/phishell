@@ -7,36 +7,34 @@ import (
 	"github.com/openai/openai-go/option"
 )
 
-type ClientRef struct {
-	Config *ConfigService
+type Profile struct {
+	Config *ConfigProfile
 
 	Client *openai.Client
 }
 
 type RequestCallback func(client *openai.Client) error
 
-func NewClientRef(config *ConfigService) *ClientRef {
-	ref := &ClientRef{
+func NewProfile(config *ConfigProfile) *Profile {
+	return &Profile{
 		Config: config,
 
 		Client: getClient(config),
 	}
-
-	return ref
 }
 
-func (c *ClientRef) Request(ctx context.Context, cb RequestCallback) error {
+func (c *Profile) Request(ctx context.Context, cb RequestCallback) error {
 	return cb(c.Client)
 }
 
-func getClient(config *ConfigService) *openai.Client {
+func getClient(profile *ConfigProfile) *openai.Client {
 	var opts []option.RequestOption
 
-	if config.BaseURL != "" {
-		opts = append(opts, option.WithBaseURL(config.BaseURL))
+	if profile.BaseURL != "" {
+		opts = append(opts, option.WithBaseURL(profile.BaseURL))
 	}
-	if config.Key != "" {
-		opts = append(opts, option.WithAPIKey(config.Key))
+	if profile.Key != "" {
+		opts = append(opts, option.WithAPIKey(profile.Key))
 	}
 
 	return openai.NewClient(opts...)

@@ -18,7 +18,7 @@ type Thread struct {
 	history *History
 	frame   *MessagesFrame
 
-	client *bootstrap.ClientRef
+	client *bootstrap.Profile
 	host   *host.Host
 
 	tools []openai.ChatCompletionToolParam
@@ -26,7 +26,7 @@ type Thread struct {
 	printer *termx.Printer
 }
 
-func NewThread(history *History, client *bootstrap.ClientRef, host *host.Host) (*Thread, error) {
+func NewThread(history *History, client *bootstrap.Profile, host *host.Host) (*Thread, error) {
 	tools, err := host.Tools()
 	if err != nil {
 		return nil, err

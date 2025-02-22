@@ -4,7 +4,7 @@ package bootstrap
 type globalCtx struct {
 	config *Config
 
-	clients []*ClientRef
+	clients []*Profile
 }
 
 func newGlobalCtx(config *Config) *globalCtx {
@@ -12,8 +12,8 @@ func newGlobalCtx(config *Config) *globalCtx {
 		config: config,
 	}
 
-	for _, p := range config.Services {
-		c := NewClientRef(p)
+	for _, p := range config.Profiles {
+		c := NewProfile(p)
 		app.clients = append(app.clients, c)
 	}
 

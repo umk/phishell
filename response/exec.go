@@ -16,7 +16,7 @@ type ExecOutputParams struct {
 	Output      execx.ProcessOutput
 }
 
-func GetExecOutput(ctx context.Context, cr *bootstrap.ClientRef, params *ExecOutputParams) (string, error) {
+func GetExecOutput(ctx context.Context, cr *bootstrap.Profile, params *ExecOutputParams) (string, error) {
 	outputStr, tail, err := params.Output.Get()
 	if err != nil {
 		return "", fmt.Errorf("invalid output: %w", err)

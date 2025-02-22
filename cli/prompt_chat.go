@@ -45,7 +45,7 @@ func (p *promptChat) getHint(ctx context.Context, mode PromptMode) string {
 }
 
 func (p *promptChat) getNextMode(ctx context.Context, current PromptMode) PromptMode {
-	clients := bootstrap.GetClients(ctx)
+	clients := bootstrap.GetProfiles(ctx)
 
 	max := int(PrChat) + len(clients)
 
@@ -53,7 +53,7 @@ func (p *promptChat) getNextMode(ctx context.Context, current PromptMode) Prompt
 }
 
 func (p *promptChat) getChatPrompt(ctx context.Context) string {
-	client := p.cli.getClient(ctx)
+	client := p.cli.getProfile(ctx)
 
 	return fmt.Sprintf("%s >>> ", client.Config.Profile)
 }

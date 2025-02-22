@@ -6,6 +6,7 @@ import (
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/tool/host/process"
+	"github.com/umk/phishell/tool/host/provider"
 	"github.com/umk/phishell/util/execx"
 )
 
@@ -16,7 +17,7 @@ type Host struct {
 	// providers can be executed.
 	terminated bool
 
-	providers []*Provider
+	providers []*provider.Provider
 	tools     any // either tools map or error
 
 	// Counts running providers to wait before close the host.
@@ -26,7 +27,7 @@ type Host struct {
 type toolsMap = map[string]*providerTool
 
 type providerTool struct {
-	provider *Provider
+	provider *provider.Provider
 	param    openai.ChatCompletionToolParam
 }
 
@@ -34,7 +35,7 @@ func NewHost() *Host {
 	return &Host{tools: make(map[string]*providerTool)}
 }
 
-func (h *Host) Execute(c *execx.Cmd) (*Provider, error) {
+func (h *Host) Execute(c *execx.Cmd) (*provider.Provider, error) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -48,13 +49,13 @@ func (h *Host) Execute(c *execx.Cmd) (*Provider, error) {
 		return nil, err
 	}
 
-	p := &Provider{
-		cmd:     c,
-		process: pr,
+	p := &provider.Provider{
+		Cmd:     c,
+		Process: pr,
 
-		info: &ProviderInfo{
+		Info: &provider.Info{
 			Pid:    pr.Cmd().Process.Pid,
-			Status: PsInitializing,
+			Status: provider.PsInitializing,
 		},
 	}
 
@@ -70,8 +71,8 @@ func (h *Host) Execute(c *execx.Cmd) (*Provider, error) {
 		h.providerDel(p)
 	}()
 
-	if err := p.initialize(); err != nil {
-		p.Terminate(PsFailed, err.Error())
+	if err := p.Init(); err != nil {
+		p.Terminate(provider.PsFailed, err.Error())
 		return nil, err
 	}
 
@@ -86,7 +87,7 @@ func (h *Host) Close() error {
 		h.terminated = true
 
 		for _, p := range h.providers {
-			go p.Terminate(PsCompleted, "host terminated")
+			go p.Terminate(provider.PsCompleted, "host terminated")
 		}
 	}()
 

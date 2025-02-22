@@ -9,7 +9,7 @@ import (
 )
 
 type UserPromptParams struct {
-	Client   *bootstrap.ClientRef
+	Client   *bootstrap.Profile
 	Messages []openai.ChatCompletionMessageParamUnion
 	Tools    []openai.ChatCompletionToolParam
 }

@@ -4,20 +4,22 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/umk/phishell/util/flagx"
+	"github.com/umk/phishell/util/slicesx"
 )
 
 type Config struct {
 	Dir           string `validate:"required"`
 	Debug         bool
 	Version       bool
-	Services      []*ConfigService `validate:"dive"`
+	Profiles      []*ConfigProfile `validate:"dive"`
 	OutputBufSize int
 }
 
-type ConfigService struct {
+type ConfigProfile struct {
 	Profile string
 
 	BaseURL string `validate:"required,url"`
@@ -28,6 +30,9 @@ type ConfigService struct {
 
 	Concurrency int `validate:"required,min=1"`
 	ContextSize int `validate:"required,min=2000"`
+
+	Dir       string `validate:"required"`
+	IsPersona bool
 }
 
 type ConfigSource int
@@ -43,9 +48,11 @@ func LoadConfig() (*Config, error) {
 	}
 
 	var serviceProfIds flagx.Strings
+	var personaIds flagx.Strings
 
 	dirFlag := flag.String("dir", "", "base directory (default current directory)")
 	flag.Var(&serviceProfIds, "profile", "configuration profile")
+	flag.Var(&personaIds, "persona", "configuration profile as persona")
 	debugFlag := flag.Bool("debug", false, "debug interactions")
 	versionFlag := flag.Bool("v", false, "show version and quit")
 
@@ -56,6 +63,9 @@ func LoadConfig() (*Config, error) {
 		flag.Usage()
 		os.Exit(1)
 	}
+
+	personaIds = slicesx.Unique(personaIds)
+	serviceProfIds = slicesx.Unique(append(serviceProfIds, personaIds...))
 
 	// Determine the current directory
 	var currentDir string
@@ -103,13 +113,15 @@ func LoadConfig() (*Config, error) {
 			continue
 		}
 
-		service := createDefaultService(id)
-		config.Services = append(config.Services, service)
+		profile := createDefaultProfile(id)
+		profile.IsPersona = slices.Contains(personaIds, id)
+
+		config.Profiles = append(config.Profiles, profile)
 
 		processedIds[id] = true
 	}
 
-	for _, p := range config.Services {
+	for _, p := range config.Profiles {
 		if err := setServiceFromConfigFile(p, f); err != nil {
 			return nil, err
 		}
@@ -125,7 +137,7 @@ func LoadConfig() (*Config, error) {
 	return config, nil
 }
 
-func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
+func setServiceFromConfigFile(target *ConfigProfile, source *ConfigFile) error {
 	profile, ok := source.Profiles[target.Profile]
 	if !ok {
 		return fmt.Errorf("profile not found: %q", target.Profile)
@@ -139,7 +151,7 @@ func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
 }
 
 func loadEnvVars(c *Config) {
-	for _, p := range c.Services {
+	for _, p := range c.Profiles {
 		if p.Key == "" {
 			if v, ok := os.LookupEnv("PHI_KEY"); ok {
 				p.Key = v
@@ -150,8 +162,8 @@ func loadEnvVars(c *Config) {
 	}
 }
 
-func createDefaultService(profile string) *ConfigService {
-	return &ConfigService{
+func createDefaultProfile(profile string) *ConfigProfile {
+	return &ConfigProfile{
 		Profile: profile,
 
 		Concurrency: 1,

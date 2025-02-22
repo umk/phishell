@@ -1,0 +1,3 @@
+[submodule "api/schema"]
+	path = api/schema
+	url = https://github.com/openai/openai-openapi.git

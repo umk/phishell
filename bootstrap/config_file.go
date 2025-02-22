@@ -17,6 +17,8 @@ type ConfigFile struct {
 }
 
 type ConfigFileProfile struct {
+	Context ConfigFileProfileContext `yaml:"-"`
+
 	Preset *string `yaml:"preset" validate:"omitempty,min=1"`
 
 	BaseURL string `yaml:"baseurl" validate:"omitempty,url"`
@@ -27,6 +29,10 @@ type ConfigFileProfile struct {
 
 	Concurrency int `yaml:"concurrency" validate:"omitempty,min=1"`
 	ContextSize int `yaml:"context" validate:"omitempty,min=2000"`
+}
+
+type ConfigFileProfileContext struct {
+	Dir string // directory where the config is located
 }
 
 // loadConfigFiles reads configuration files and returns combined configuration.
@@ -41,13 +47,13 @@ func loadConfigFiles(currentDir string) (*ConfigFile, error) {
 	}
 
 	homeConfigPath := filepath.Join(homeDir, ".phishell.yaml")
-	if err := LoadConfigFile(homeConfigPath, &config, true); err != nil {
+	if err := LoadConfigFile(homeConfigPath, &config); err != nil {
 		return nil, err
 	}
 
 	if homeDir != currentDir {
 		dirConfigPath := filepath.Join(currentDir, ".phishell.yaml")
-		if err := LoadConfigFile(dirConfigPath, &config, false); err != nil {
+		if err := LoadConfigFile(dirConfigPath, &config); err != nil {
 			return nil, err
 		}
 	}
@@ -56,7 +62,7 @@ func loadConfigFiles(currentDir string) (*ConfigFile, error) {
 }
 
 // LoadConfigFile reads a YAML configuration file and updates combined config.
-func LoadConfigFile(path string, config *ConfigFile, isGlobal bool) error {
+func LoadConfigFile(path string, config *ConfigFile) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		// If the file does not exist, skip without error
@@ -85,13 +91,17 @@ func LoadConfigFile(path string, config *ConfigFile, isGlobal bool) error {
 	}
 
 	for k, v := range current.Profiles {
+		v.Context = ConfigFileProfileContext{
+			Dir: filepath.Dir(path),
+		}
+
 		config.Profiles[k] = v
 	}
 
 	return nil
 }
 
-func setServiceFromProfileOrPreset(target *ConfigService, source *ConfigFileProfile) error {
+func setServiceFromProfileOrPreset(target *ConfigProfile, source *ConfigFileProfile) error {
 	if source.Preset != nil {
 		preset, ok := presets[*source.Preset]
 		if !ok {
@@ -110,7 +120,7 @@ func setServiceFromProfileOrPreset(target *ConfigService, source *ConfigFileProf
 	return nil
 }
 
-func setServiceFromProfile(target *ConfigService, source *ConfigFileProfile) error {
+func setServiceFromProfile(target *ConfigProfile, source *ConfigFileProfile) error {
 	if source.BaseURL != "" {
 		target.BaseURL = source.BaseURL
 	}
@@ -131,6 +141,8 @@ func setServiceFromProfile(target *ConfigService, source *ConfigFileProfile) err
 	if source.ContextSize > 0 {
 		target.ContextSize = source.ContextSize
 	}
+
+	target.Dir = source.Context.Dir
 
 	return nil
 }

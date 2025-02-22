@@ -1,4 +1,4 @@
-package provider
+package schema
 
 type Response struct {
 	// ID of the tool call that this message is responding to.

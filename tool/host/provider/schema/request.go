@@ -1,4 +1,4 @@
-package provider
+package schema
 
 type Request struct {
 	// Correlation ID of the tool call.
