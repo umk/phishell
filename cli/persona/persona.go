@@ -20,13 +20,13 @@ func New(profile *bootstrap.Profile) *Persona {
 
 func (p *Persona) Init(ctx context.Context) error {
 	norm := fsx.Normalize(p.profile.Config.Profile)
-	pdir := filepath.Join(p.profile.Config.Dir, norm)
+	jsDir := filepath.Join(p.profile.Config.Dir, norm)
 
-	if err := os.MkdirAll(pdir, 0644); err != nil {
+	if err := os.MkdirAll(jsDir, 0644); err != nil {
 		return fmt.Errorf("cannot create persona directory: %w", err)
 	}
 
-	if err := createPersonaFiles(pdir); err != nil {
+	if err := createPersonaFiles(jsDir); err != nil {
 		return err
 	}
 
