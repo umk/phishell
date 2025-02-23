@@ -5,8 +5,8 @@
   "homepage": "https://github.com/umk/pihshell#readme",
   "type": "module",
   "scripts": {
-    "build": "rimraf ./dist && tsc -p tsconfig.prod.json && node ./esbuild.js && chmod +x ./bin/persona",
-    "start": "npm run build && ./bin/persona",
+    "build": "rimraf ./dist && tsc -p tsconfig.prod.json && node ./esbuild.js",
+    "build:release": "npm run build && cp ./bin/persona.mjs ${OUTPUT_PATH:-../../../persona.mjs}",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.{ts,js}\" --write",
     "fix:lint": "eslint src --ext .ts,.js --fix",

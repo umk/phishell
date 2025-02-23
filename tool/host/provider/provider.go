@@ -91,7 +91,7 @@ func Start(c *execx.Cmd) (*Provider, error) {
 }
 
 func (p *Provider) Post(req *schema.Request) (*schema.Response, error) {
-	if !p.terminated.Load() {
+	if p.terminated.Load() {
 		return nil, errors.New("provider is terminated")
 	}
 

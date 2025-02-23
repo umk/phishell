@@ -45,7 +45,9 @@ func main() {
 func runCli(ctx context.Context) error {
 	c := cli.NewCli()
 
-	log.SetOutput(io.Discard)
+	if os.Getenv("DEBUG") == "" {
+		log.SetOutput(io.Discard)
+	}
 
 	if err := c.Init(ctx); err != nil {
 		return err

@@ -38,7 +38,9 @@ func (p *Persona) Post(ctx context.Context, content string) error {
 		return fmt.Errorf("cannot get working directory: %w", err)
 	}
 
-	arguments, err := json.Marshal(content)
+	arguments, err := json.Marshal(map[string]any{
+		"message": content,
+	})
 	if err != nil {
 		return fmt.Errorf("cannot marshal content: %w", err)
 	}

@@ -1,8 +1,6 @@
 import esbuild from 'esbuild'
 
-const banner = `#!/usr/bin/env node
-
-import * as module__ from 'module';
+const banner = `import * as module__ from 'module';
 import * as url__ from 'url';
 import * as path__ from 'path';
 
@@ -17,7 +15,7 @@ esbuild
     bundle: true,
     minify: true,
     platform: 'node',
-    outfile: 'bin/persona',
+    outfile: 'bin/persona.mjs',
     target: ['node18'],
     format: 'esm',
     external: ['readline/promises'],

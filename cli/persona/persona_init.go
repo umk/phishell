@@ -15,9 +15,9 @@ import (
 
 func (p *Persona) Init(ctx context.Context) error {
 	norm := fsx.Normalize(p.profile.Config.Profile)
-	jsDir := filepath.Join(p.profile.Config.Dir, norm)
+	jsDir := filepath.Join(p.profile.Config.Dir, ".phishell", norm)
 
-	if err := os.MkdirAll(jsDir, 0644); err != nil {
+	if err := os.MkdirAll(jsDir, 0755); err != nil {
 		return fmt.Errorf("cannot create persona directory: %w", err)
 	}
 
@@ -27,14 +27,14 @@ func (p *Persona) Init(ctx context.Context) error {
 
 	sock, server, err := api.Serve(ctx, nil)
 	if err != nil {
-		return fmt.Errorf("failed to start API server: %w", err)
+		return fmt.Errorf("failed to start persona API server: %w", err)
 	}
 	p.server = server
 
 	provider, err := initProvider(jsDir, sock)
 	if err != nil {
 		server.Close()
-		return fmt.Errorf("failed to start provider: %w", err)
+		return fmt.Errorf("failed to start persona provider: %w", err)
 	}
 	p.provider = provider
 
@@ -47,7 +47,7 @@ func initProvider(jsDir string, sock string) (*provider.Provider, error) {
 		return nil, fmt.Errorf("unable to determine location of executable: %w", err)
 	}
 
-	corePath := filepath.Join(filepath.Dir(execPath), "persona.js")
+	corePath := filepath.Join(filepath.Dir(execPath), "persona.mjs")
 	return provider.Start(&execx.Cmd{
 		Cmd:  "node",
 		Args: []string{corePath, "--", jsDir},

@@ -15,13 +15,14 @@ func ensurePersonaFiles(jsDir string) error {
 		}
 		return nil
 	}
+	if err := os.MkdirAll(filepath.Join(jsDir, "src"), 0755); err != nil {
+		return fmt.Errorf("failed to create src: %w", err)
+	}
+
 	if !os.IsNotExist(err) {
 		return fmt.Errorf("failed to check package.json: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(jsDir, "src"), 0644); err != nil {
-		return fmt.Errorf("failed to create src: %w", err)
-	}
 	if err := createPackageFile(jsDir); err != nil {
 		return err
 	}
