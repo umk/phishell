@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"io"
 	"math/rand"
 	"net"
 	"net/http"
@@ -12,10 +11,10 @@ import (
 	"time"
 )
 
-// Run starts the server on a Unix domain socket and sends runtime errors to errOut.
+// Serve starts the server on a Unix domain socket and sends runtime errors to errOut.
 // Returns the socket path as a string, an io.Closer (the HTTP server) that can be
 // used for immediate shutdown, and an error if any issue occurs during initialization.
-func Run(ctx context.Context, errOut chan<- error) (string, io.Closer, error) {
+func Serve(ctx context.Context, errOut chan<- error) (string, *http.Server, error) {
 	sp := getSocketPath()
 	os.Remove(sp)
 

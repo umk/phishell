@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/tool/host/process"
 	"github.com/umk/phishell/tool/host/provider"
 	"github.com/umk/phishell/util/execx"
 )
@@ -43,23 +42,11 @@ func (h *Host) Execute(c *execx.Cmd) (*provider.Provider, error) {
 		return nil, errors.New("host is terminated")
 	}
 
-	// Start provider process and create provider
-	pr, err := process.Start(c)
+	p, err := provider.Start(c)
 	if err != nil {
 		return nil, err
 	}
 
-	p := &provider.Provider{
-		Cmd:     c,
-		Process: pr,
-
-		Info: &provider.Info{
-			Pid:    pr.Cmd().Process.Pid,
-			Status: provider.PsInitializing,
-		},
-	}
-
-	// Register created provider in the host
 	h.providerAdd(p)
 
 	go func() {
@@ -70,11 +57,6 @@ func (h *Host) Execute(c *execx.Cmd) (*provider.Provider, error) {
 
 		h.providerDel(p)
 	}()
-
-	if err := p.Init(); err != nil {
-		p.Terminate(provider.PsFailed, err.Error())
-		return nil, err
-	}
 
 	return p, nil
 }

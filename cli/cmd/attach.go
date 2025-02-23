@@ -17,13 +17,11 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 		return fmt.Errorf("usage: %s", c.Usage())
 	}
 
-	cmd := execx.Cmd{
+	p, err := c.context.session.Host.Execute(&execx.Cmd{
 		Cmd:  args[0],
 		Args: args[1:],
 		Env:  append(os.Environ(), "PHI_SHELL=1"),
-	}
-
-	p, err := c.context.session.Host.Execute(&cmd)
+	})
 	if err != nil {
 		return err
 	}

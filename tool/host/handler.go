@@ -13,7 +13,7 @@ type HostedToolHandler struct {
 }
 
 func (h *HostedToolHandler) Execute(ctx context.Context) (any, error) {
-	res, err := h.provider.Process.Post(h.req)
+	res, err := h.provider.Post(h.req)
 	if err != nil {
 		return nil, err
 	}

@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time" // added
 
 	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli"
@@ -49,6 +50,12 @@ func runCli(ctx context.Context) error {
 	if err := c.Init(ctx); err != nil {
 		return err
 	}
+	defer func() {
+		ctxTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+		defer cancel()
+
+		c.Shutdown(ctxTimeout)
+	}()
 
 	if err := c.Run(ctx); err != nil {
 		return err

@@ -18,7 +18,7 @@ import (
 const RestartExitCode = 42
 
 type Provider struct {
-	init sync.Mutex
+	statuMu sync.Mutex
 
 	// Indicates whether provider termination was initiated, so no new
 	// requests can be made to underlying process.
@@ -37,21 +37,21 @@ type Provider struct {
 
 type Info struct {
 	Pid           int
-	Status        ProviderStatus
+	Status        Status
 	StatusMessage string
 }
 
-type ProviderStatus int
+type Status int
 
 const (
-	_              ProviderStatus = iota
-	PsInitializing                // Host application is reading headers
-	PsRunning                     // Host application is reading messages
-	PsCompleted                   // Process has exited normally
-	PsFailed                      // Process was terminated or exited with non-zero code
+	_              Status = iota
+	PsInitializing        // Host application is reading headers
+	PsRunning             // Host application is reading messages
+	PsCompleted           // Process has exited normally
+	PsFailed              // Process was terminated or exited with non-zero code
 )
 
-func (s ProviderStatus) String() string {
+func (s Status) String() string {
 	switch s {
 	case PsInitializing:
 		return "Initializing"
@@ -66,6 +66,30 @@ func (s ProviderStatus) String() string {
 	return ""
 }
 
+func Start(c *execx.Cmd) (*Provider, error) {
+	pr, err := process.Start(c)
+	if err != nil {
+		return nil, err
+	}
+
+	p := &Provider{
+		Cmd:     c,
+		Process: pr,
+
+		Info: &Info{
+			Pid:    pr.Cmd().Process.Pid,
+			Status: PsInitializing,
+		},
+	}
+
+	if err := p.init(); err != nil {
+		p.Terminate(PsFailed, err.Error())
+		return nil, err
+	}
+
+	return p, nil
+}
+
 func (p *Provider) Post(req *schema.Request) (*schema.Response, error) {
 	if !p.terminated.Load() {
 		return nil, errors.New("provider is terminated")
@@ -74,7 +98,7 @@ func (p *Provider) Post(req *schema.Request) (*schema.Response, error) {
 	return p.Process.Post(req)
 }
 
-func (p *Provider) Terminate(status ProviderStatus, message string) ProviderStatus {
+func (p *Provider) Terminate(status Status, message string) Status {
 	if s, ok := p.finalize(status, message); !ok {
 		return s
 	}
@@ -107,8 +131,8 @@ func (p *Provider) Terminate(status ProviderStatus, message string) ProviderStat
 	return status
 }
 
-func (p *Provider) Wait() ProviderStatus {
-	var status ProviderStatus
+func (p *Provider) Wait() Status {
+	var status Status
 	var message string
 
 	for {
@@ -142,9 +166,9 @@ func (p *Provider) Wait() ProviderStatus {
 	return p.Info.Status
 }
 
-func (p *Provider) Init() error {
-	p.init.Lock()
-	defer p.init.Unlock()
+func (p *Provider) init() error {
+	p.statuMu.Lock()
+	defer p.statuMu.Unlock()
 
 	if p.terminated.Load() {
 		return errors.New("provider is terminated")
@@ -165,9 +189,9 @@ func (p *Provider) Init() error {
 	return nil
 }
 
-func (p *Provider) finalize(status ProviderStatus, message string) (s ProviderStatus, ok bool) {
-	p.init.Lock()
-	defer p.init.Unlock()
+func (p *Provider) finalize(status Status, message string) (s Status, ok bool) {
+	p.statuMu.Lock()
+	defer p.statuMu.Unlock()
 
 	if p.terminated.Swap(true) {
 		// Just silently return as the process has already been finalized,
@@ -194,7 +218,7 @@ func (p *Provider) restart() error {
 
 	p.Process = pr
 
-	if err := p.Init(); err != nil {
+	if err := p.init(); err != nil {
 		return err
 	}
 

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func createPersonaFiles(jsDir string) error {
+func ensurePersonaFiles(jsDir string) error {
 	pkgPath := filepath.Join(jsDir, "package.json")
 	stat, err := os.Stat(pkgPath)
 	if err == nil {
