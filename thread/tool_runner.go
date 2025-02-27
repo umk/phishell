@@ -123,33 +123,28 @@ func confirmToolCall(ctx context.Context, h *ToolRunnerHandler) error {
 	descr, _ := tool.Describe(ctx, h.handler)
 
 	if descr != "" {
-		termx.Action.Println(descr)
+		termx.NewPrinter().Println(descr)
 	} else {
 		dn := strings.ToLower(stringsx.DisplayName(t))
-		termx.Action.Printf("Running %s\n", dn)
+		termx.NewPrinter().Printf("Running %s\n", dn)
 	}
 
-	k, err := termx.ReadKeyOrDefaultOf("Continue? (Y/n/x) ", 'y', 'n', 'x')
-	if err != nil {
-		return err
-	}
-
-	switch k {
-	case 'n':
-		return errors.New("operation was canceled by user")
-	case 'x':
-		details, err := termx.ReadLine("explain >>> ")
+	for {
+		s, err := termx.ReadPrompt(ctx, &termx.Static{
+			Prompt: ">>> ",
+			Hint:   "Press Enter to execute or Ctrl+C to cancel",
+		})
 		if err != nil {
 			return err
 		}
 
-		details = strings.TrimSpace(details)
-		if details == "" {
-			return errors.New("operation was canceled by user")
-		} else {
-			return fmt.Errorf("operation was canceled by user with explanation: %s", details)
+		if s == "" {
+			return nil
+		}
+
+		s = strings.TrimSpace(s)
+		if s != "" {
+			return errors.New(s)
 		}
 	}
-
-	return nil
 }

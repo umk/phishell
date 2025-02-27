@@ -13,8 +13,8 @@ type promptChat struct {
 	cli *Cli
 }
 
-func (p *promptChat) getPrompt(ctx context.Context, mode PromptMode) string {
-	switch mode {
+func (p *promptChat) GetPrompt(ctx context.Context) string {
+	switch p.cli.mode {
 	case PrCommand:
 		return p.getCommandPrompt()
 	default:
@@ -22,8 +22,8 @@ func (p *promptChat) getPrompt(ctx context.Context, mode PromptMode) string {
 	}
 }
 
-func (p *promptChat) getHint(ctx context.Context, mode PromptMode) string {
-	if mode == PrCommand {
+func (p *promptChat) GetHint(ctx context.Context) string {
+	if p.cli.mode == PrCommand {
 		return ""
 	}
 
@@ -44,12 +44,12 @@ func (p *promptChat) getHint(ctx context.Context, mode PromptMode) string {
 	}
 }
 
-func (p *promptChat) getNextMode(ctx context.Context, current PromptMode) PromptMode {
+func (p *promptChat) CycleMode(ctx context.Context) {
 	clients := bootstrap.GetClients(ctx)
 
 	max := int(PrChat) + len(clients)
 
-	return PromptMode((int(current) + 1) % max)
+	p.cli.mode = PromptMode((int(p.cli.mode) + 1) % max)
 }
 
 func (p *promptChat) getChatPrompt(ctx context.Context) string {
