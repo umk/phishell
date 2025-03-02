@@ -65,17 +65,12 @@ Each of the profiles specify the following data:
             <td></td>
         </tr>
         <tr valign="top">
-            <td><code>retries</code></td>
-            <td>The number of times that Phi Shell will call LLM for inference in case if the response didn't pass validation.</td>
-            <td>5</td>
-        </tr>
-        <tr valign="top">
             <td><code>concurrency</code></td>
             <td>How many concurrent calls can be made to LLM</td>
             <td>1</td>
         </tr>
         <tr valign="top">
-            <td><code>compactionToks</code></td>
+            <td><code>context</code></td>
             <td>The number of tokens when Phi Shell will start compaction of the conversation history. This number can be exceeded anyway when running long chains of interaction with LLM, which involve several tools calls in a row.</td>
             <td>2000</td>
         </tr>
