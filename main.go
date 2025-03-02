@@ -15,23 +15,27 @@ import (
 	"github.com/umk/phishell/util/termx"
 )
 
+//go:embed VERSION
+var version string
+
 func main() {
 	if !termx.IsInteractive() {
 		os.Exit(1)
 	}
 
-	config, err := bootstrap.LoadConfig()
-	if err != nil {
+	if err := bootstrap.InitConfig(); err != nil {
 		termx.Error.Printf("error loading config: %v\n", err)
 		os.Exit(1)
 	}
 
-	if config.Version {
+	bootstrap.InitClients()
+
+	if bootstrap.Config.Version {
 		fmt.Println(version)
 		os.Exit(0)
 	}
 
-	ctx := setupContext(config)
+	ctx := context.Background()
 
 	if err := runCli(ctx); err != nil {
 		if !errors.Is(err, io.EOF) && !errorsx.IsCanceled(err) {
@@ -55,9 +59,4 @@ func runCli(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func setupContext(config *bootstrap.Config) context.Context {
-	ctx := bootstrap.NewContext(config)
-	return initContext(ctx)
 }

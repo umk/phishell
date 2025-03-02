@@ -48,7 +48,7 @@ func (c *Client) Completion(ctx context.Context, params openai.ChatCompletionNew
 		totalToks := compl.Usage.TotalTokens
 		bytesPerTok := c.Samples.BytesPerTok()
 
-		if bootstrap.IsDebug(ctx) {
+		if bootstrap.Config.Debug {
 			termx.Muted.Printf("(messages=%d; prompt=%d; completion=%d; total=%d; bytes per tok=%.2f)\n",
 				messages, promptToks, complToks, totalToks, bytesPerTok,
 			)

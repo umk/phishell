@@ -49,7 +49,7 @@ func NewFsReadToolHandler(argsJSON, baseDir string) (*FsReadToolHandler, error) 
 }
 
 func (h *FsReadToolHandler) Execute(ctx context.Context) (any, error) {
-	if bootstrap.IsDebug(ctx) {
+	if bootstrap.Config.Debug {
 		termx.Muted.Printf("(call) %s; path=%s\n", FsReadToolName, h.arguments.Path)
 	}
 

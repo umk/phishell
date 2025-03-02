@@ -39,9 +39,7 @@ func NewCli() *Cli {
 }
 
 func (c *Cli) Init(ctx context.Context) error {
-	config := bootstrap.GetConfig(ctx)
-
-	if err := os.Chdir(config.Dir); err != nil {
+	if err := os.Chdir(bootstrap.Config.Dir); err != nil {
 		return err
 	}
 
@@ -74,9 +72,7 @@ func (c *Cli) getClient(ctx context.Context) *bootstrap.ClientRef {
 		panic("prompt is not in a chat mode")
 	}
 
-	clients := bootstrap.GetClients(ctx)
-
-	return clients[n]
+	return bootstrap.Clients[n]
 }
 
 func cancelOnSigTerm() func(context.Context) context.Context {

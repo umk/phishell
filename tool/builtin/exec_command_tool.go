@@ -75,7 +75,7 @@ func NewExecCommandToolHandler(argsJSON, baseDir string) (*ExecCommandToolHandle
 }
 
 func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
-	if bootstrap.IsDebug(ctx) {
+	if bootstrap.Config.Debug {
 		termx.Muted.Printf("(call) %s; command=%s\n", ExecCommandToolName, h.arguments.CommandLine)
 	}
 
@@ -93,8 +93,7 @@ func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
 	}
 
 	// Running command
-	config := bootstrap.GetConfig(ctx)
-	logger := execx.Log(cmds[len(cmds)-1], config.OutputBufSize)
+	logger := execx.Log(cmds[len(cmds)-1], bootstrap.Config.OutputBufSize)
 
 	exitCode, err := execx.RunPipe(cmds)
 	if err != nil {

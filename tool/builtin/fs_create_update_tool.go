@@ -55,7 +55,7 @@ func NewFsCreateOrUpdateToolHandler(argsJSON, baseDir string) (*FsCreateOrUpdate
 }
 
 func (h *FsCreateOrUpdateToolHandler) Execute(ctx context.Context) (any, error) {
-	if bootstrap.IsDebug(ctx) {
+	if bootstrap.Config.Debug {
 		termx.Muted.Printf("(call) %s; path=%s\n", FsCreateOrUpdateToolName, h.arguments.Path)
 	}
 

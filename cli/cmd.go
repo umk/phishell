@@ -87,8 +87,7 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 		return err
 	}
 
-	config := bootstrap.GetConfig(ctx)
-	logger := execx.Log(cmds[len(cmds)-1], config.OutputBufSize)
+	logger := execx.Log(cmds[len(cmds)-1], bootstrap.Config.OutputBufSize)
 
 	exitCode, err := execx.RunPipe(cmds)
 
@@ -113,7 +112,7 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 			ExitCode:    0,
 			Output:      output,
 		}
-	} else if bootstrap.IsDebug(ctx) {
+	} else if bootstrap.Config.Debug {
 		termx.Muted.Printf("(error) %v\n", err)
 	}
 

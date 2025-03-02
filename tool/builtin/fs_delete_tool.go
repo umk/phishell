@@ -50,7 +50,7 @@ func NewFsDeleteToolHandler(argsJSON, baseDir string) (*FsDeleteToolHandler, err
 }
 
 func (h *FsDeleteToolHandler) Execute(ctx context.Context) (any, error) {
-	if bootstrap.IsDebug(ctx) {
+	if bootstrap.Config.Debug {
 		termx.Muted.Printf("(call) %s; path=%s\n", FsDeleteToolName, h.arguments.Path)
 	}
 

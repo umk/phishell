@@ -9,7 +9,7 @@ import (
 	"github.com/umk/phishell/util/flagx"
 )
 
-type Config struct {
+var Config struct {
 	Dir           string `validate:"required"`
 	Debug         bool
 	Version       bool
@@ -32,22 +32,22 @@ type ConfigService struct {
 
 type ConfigSource int
 
-// LoadConfig reads configuration from flags, environment variables, and config files.
-func LoadConfig() (*Config, error) {
+// InitConfig reads configuration from flags, environment variables, and config files.
+func InitConfig() error {
 	// Define command-line flags
 	flag.Usage = func() {
 		w := flag.CommandLine.Output()
-		fmt.Fprint(w, "Usage: phishell option...\n")
+		fmt.Fprint(w, "Usage: hackkd option...\n")
 		fmt.Fprint(w, "Options:\n")
 		flag.PrintDefaults()
 	}
 
 	var serviceProfIds flagx.Strings
 
-	dirFlag := flag.String("dir", "", "base directory (default current directory)")
+	flag.StringVar(&Config.Dir, "dir", "", "base directory (default current directory)")
 	flag.Var(&serviceProfIds, "profile", "configuration profile")
-	debugFlag := flag.Bool("debug", false, "debug interactions")
-	versionFlag := flag.Bool("v", false, "show version and quit")
+	flag.BoolVar(&Config.Debug, "debug", false, "debug interactions")
+	flag.BoolVar(&Config.Version, "v", false, "show version and quit")
 
 	// Parse the flags
 	flag.Parse()
@@ -58,22 +58,19 @@ func LoadConfig() (*Config, error) {
 	}
 
 	// Determine the current directory
-	var currentDir string
-	if *dirFlag != "" {
-		currentDir = *dirFlag
-	} else {
+	if Config.Dir == "" {
 		// Fallback to current working directory
 		wd, err := os.Getwd()
 		if err != nil {
-			return nil, fmt.Errorf("cannot get working directory: %w", err)
+			return fmt.Errorf("cannot get working directory: %w", err)
 		}
-		currentDir = wd
+		Config.Dir = wd
 	}
 
 	// Loading config files
-	f, err := loadConfigFiles(currentDir)
+	f, err := loadConfigFiles(Config.Dir)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Getting profile for service client
@@ -88,13 +85,7 @@ func LoadConfig() (*Config, error) {
 	}
 
 	// Initialize Config with default values
-	config := &Config{
-		Dir:     currentDir,
-		Debug:   *debugFlag,
-		Version: *versionFlag,
-
-		OutputBufSize: 512 * 1024,
-	}
+	Config.OutputBufSize = 512 * 1024
 
 	processedIds := make(map[string]bool)
 
@@ -104,25 +95,25 @@ func LoadConfig() (*Config, error) {
 		}
 
 		service := createDefaultService(id)
-		config.Services = append(config.Services, service)
+		Config.Services = append(Config.Services, service)
 
 		processedIds[id] = true
 	}
 
-	for _, p := range config.Services {
+	for _, p := range Config.Services {
 		if err := setServiceFromConfigFile(p, f); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	loadEnvVars(config)
+	loadEnvVars()
 
 	v := validator.New()
-	if err := v.Struct(config); err != nil {
-		return nil, err
+	if err := v.Struct(Config); err != nil {
+		return err
 	}
 
-	return config, nil
+	return nil
 }
 
 func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
@@ -138,8 +129,8 @@ func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
 	return nil
 }
 
-func loadEnvVars(c *Config) {
-	for _, p := range c.Services {
+func loadEnvVars() {
+	for _, p := range Config.Services {
 		if p.Key == "" {
 			if v, ok := os.LookupEnv("PHI_KEY"); ok {
 				p.Key = v

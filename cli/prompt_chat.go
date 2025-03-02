@@ -45,9 +45,7 @@ func (p *promptChat) GetHint(ctx context.Context) string {
 }
 
 func (p *promptChat) CycleMode(ctx context.Context) {
-	clients := bootstrap.GetClients(ctx)
-
-	max := int(PrChat) + len(clients)
+	max := int(PrChat) + len(bootstrap.Clients)
 
 	p.cli.mode = PromptMode((int(p.cli.mode) + 1) % max)
 }
