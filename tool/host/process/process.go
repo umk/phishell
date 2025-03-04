@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -61,6 +62,8 @@ func New(cmd *exec.Cmd) (*Process, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to pipe Stdout: %w", err)
 	}
+
+	cmd.Stderr = os.Stderr
 
 	return &Process{
 		cmd: cmd,

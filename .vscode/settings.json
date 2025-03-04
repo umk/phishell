@@ -1,11 +1,13 @@
 {
-    "[gotmpl]": {
-        "editor.wordWrap": "on"
-    },
-    "[plaintext]": {
-        "editor.wordWrap": "on"
-    },
-    "[markdown]": {
-        "editor.wordWrap": "on"
-    }
+  "editor.formatOnSave": true,
+  "typescript.tsc.autoDetect": "off",
+  "[gotmpl]": {
+    "editor.wordWrap": "on"
+  },
+  "[plaintext]": {
+    "editor.wordWrap": "on"
+  },
+  "[markdown]": {
+    "editor.wordWrap": "on"
+  }
 }

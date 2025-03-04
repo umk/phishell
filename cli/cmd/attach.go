@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/umk/phishell/util/execx"
 )
@@ -15,6 +16,16 @@ type AttachCommand struct {
 func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) < 1 {
 		return fmt.Errorf("usage: %s", c.Usage())
+	}
+
+	if args[0] == "package" {
+		executable, err := os.Executable()
+		if err != nil {
+			return fmt.Errorf("unable to determine executable location: %w", err)
+		}
+
+		jsPath := filepath.Join(filepath.Dir(executable), "phishell-js.mjs")
+		args = append(execx.Arguments{"node", jsPath, "--"}, args[1:]...)
 	}
 
 	cmd := execx.Cmd{

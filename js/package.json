@@ -1,0 +1,55 @@
+{
+    "name": "@phishell/persona",
+    "version": "0.1.0",
+    "author": "Uladzislau Maslakou <umaslakou@gmail.com>",
+    "homepage": "https://github.com/umk/pihshell#readme",
+    "type": "module",
+    "scripts": {
+        "build": "rimraf ./dist && tsc -p tsconfig.prod.json && node ./esbuild.js",
+        "build:release": "npm run build && cp ./bin/persona.mjs ${OUTPUT_PATH:-../phishell-js.mjs}",
+        "fix": "run-s fix:*",
+        "fix:prettier": "prettier \"src/**/*.{ts,js}\" --write",
+        "fix:lint": "eslint src --ext .ts,.js --fix",
+        "test": "run-s test:*",
+        "test:prettier": "prettier \"src/**/*.{ts,js}\" --list-different",
+        "test:lint": "eslint src --ext .ts,.tsx,.js",
+        "test:unit": "jest test --silent"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/umk/pihshell.git"
+    },
+    "bin": {
+        "persona": "./bin/persona"
+    },
+    "bugs": {
+        "url": "https://github.com/umk/phishell/issues"
+    },
+    "devDependencies": {
+        "@faker-js/faker": "^9.5.0",
+        "@types/jest": "^29.5.14",
+        "@types/node": "^22.13.4",
+        "@typescript-eslint/eslint-plugin": "^8.24.0",
+        "@typescript-eslint/parser": "^8.24.0",
+        "cross-env": "^7.0.3",
+        "esbuild": "^0.25.0",
+        "eslint": "^9.20.1",
+        "eslint-config-prettier": "^10.0.1",
+        "eslint-plugin-eslint-comments": "^3.2.0",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-jest": "^28.11.0",
+        "eslint-plugin-prettier": "^5.2.3",
+        "jest": "^29.7.0",
+        "jest-mock": "^29.7.0",
+        "npm-run-all": "^4.1.5",
+        "prettier": "^3.5.1",
+        "rimraf": "^6.0.1",
+        "ts-jest": "^29.2.5",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.7.3"
+    },
+    "dependencies": {
+        "ajv": "^8.17.1",
+        "fn-json-schema": "^0.1.5"
+    }
+}
