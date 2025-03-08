@@ -8,7 +8,7 @@ import (
 	"os/exec"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/prompt/msg"
 	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/util/execx"
@@ -75,7 +75,7 @@ func NewExecCommandToolHandler(argsJSON, baseDir string) (*ExecCommandToolHandle
 }
 
 func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
-	if bootstrap.Config.Debug {
+	if config.Config.Debug {
 		termx.Muted.Printf("(call) %s; command=%s\n", ExecCommandToolName, h.arguments.CommandLine)
 	}
 
@@ -93,7 +93,7 @@ func (h *ExecCommandToolHandler) Execute(ctx context.Context) (any, error) {
 	}
 
 	// Running command
-	logger := execx.Log(cmds[len(cmds)-1], bootstrap.Config.OutputBufSize)
+	logger := execx.Log(cmds[len(cmds)-1], config.Config.OutputBufSize)
 
 	exitCode, err := execx.RunPipe(cmds)
 	if err != nil {

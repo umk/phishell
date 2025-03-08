@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/session"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/util/execx"
 	"github.com/umk/phishell/util/termx"
 )
@@ -87,7 +87,7 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 		return err
 	}
 
-	logger := execx.Log(cmds[len(cmds)-1], bootstrap.Config.OutputBufSize)
+	logger := execx.Log(cmds[len(cmds)-1], config.Config.OutputBufSize)
 
 	exitCode, err := execx.RunPipe(cmds)
 
@@ -112,7 +112,7 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 			ExitCode:    0,
 			Output:      output,
 		}
-	} else if bootstrap.Config.Debug {
+	} else if config.Config.Debug {
 		termx.Muted.Printf("(error) %v\n", err)
 	}
 

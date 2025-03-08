@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/tool/host/provider"
+	"github.com/umk/phishell/tool/host/provider/schema"
 	"github.com/umk/phishell/util/execx"
 )
 
@@ -95,7 +95,7 @@ func (p *Process) WaitOnce() error {
 }
 
 // Post sends the request to a tools provider and waits for a response.
-func (p *Process) Post(req *provider.Request) (*provider.Response, error) {
+func (p *Process) Post(req *schema.Request) (*schema.Response, error) {
 	ch, err := p.requestSend(req)
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func (p *Process) Post(req *provider.Request) (*provider.Response, error) {
 			return nil, errors.New("request canceled")
 		}
 		switch v := res.(type) {
-		case *provider.Response:
+		case *schema.Response:
 			return v, nil
 		case error:
 			return nil, v

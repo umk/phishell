@@ -1,10 +1,10 @@
-import { getPackageInfo, PackageInfo } from 'fn-json-schema'
-
 import getFunctions, { FunctionInfo } from './getFunctions.js'
 import getPackage from './getPackage.js'
+import getPackageInfo, { PackageInfo } from './getPackageInfo.js'
 
 type Context = {
   functions: Array<FunctionInfo>
+  modulePath: string
 }
 
 export async function createContext(): Promise<Context> {
@@ -13,7 +13,9 @@ export async function createContext(): Promise<Context> {
   }
 }
 
-async function createFunctionsContext(packageDir: string): Promise<Pick<Context, 'functions'>> {
+async function createFunctionsContext(
+  packageDir: string,
+): Promise<Pick<Context, 'functions' | 'modulePath'>> {
   let packageInfo: PackageInfo
   try {
     packageInfo = await getPackageInfo(packageDir)
@@ -23,12 +25,15 @@ async function createFunctionsContext(packageDir: string): Promise<Pick<Context,
   }
   let p
   try {
-    p = await getPackage(packageDir)
+    p = await getPackage(packageInfo)
   } catch (error) {
     throw new Error(`Cannot load package: ${error}`)
   }
-  const functions = await getFunctions(packageDir, packageInfo, p)
-  return { functions }
+  const functions = await getFunctions(packageDir, p)
+  return {
+    functions,
+    modulePath: packageInfo.modulePath,
+  }
 }
 
 export default Context

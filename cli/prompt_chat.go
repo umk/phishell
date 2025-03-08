@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/umk/phishell/bootstrap"
+	"github.com/umk/phishell/client"
 )
 
 type promptChat struct {
@@ -45,7 +45,7 @@ func (p *promptChat) GetHint(ctx context.Context) string {
 }
 
 func (p *promptChat) CycleMode(ctx context.Context) {
-	max := int(PrChat) + len(bootstrap.Clients)
+	max := int(PrChat) + len(client.Clients)
 
 	p.cli.mode = PromptMode((int(p.cli.mode) + 1) % max)
 }

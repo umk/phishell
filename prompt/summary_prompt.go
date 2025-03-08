@@ -4,8 +4,7 @@ import (
 	"context"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/prompt/client"
+	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/prompt/msg"
 )
 
@@ -14,7 +13,7 @@ type SummaryPromptParams struct {
 }
 
 func PromptSummary(ctx context.Context, params *SummaryPromptParams) (*Completion, error) {
-	cl := client.Get(bootstrap.GetDefaultClient())
+	cl := client.Get(client.Default)
 
 	m, err := msg.FormatSummaryReqMessage(&msg.SummaryReqMessageParams{})
 	if err != nil {

@@ -1,4 +1,4 @@
-async function* getLines(stream: NodeJS.ReadStream): AsyncGenerator<string> {
+async function* readRequests(stream: NodeJS.ReadStream): AsyncGenerator<string> {
   let leftover: Buffer | undefined = undefined
 
   for await (const chunk of stream) {
@@ -18,4 +18,4 @@ async function* getLines(stream: NodeJS.ReadStream): AsyncGenerator<string> {
   }
 }
 
-export default getLines
+export default readRequests

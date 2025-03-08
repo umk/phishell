@@ -1,4 +1,4 @@
-package bootstrap
+package config
 
 var presetOpenAI = ConfigFileProfile{
 	Concurrency: 5,

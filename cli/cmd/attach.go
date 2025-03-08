@@ -18,14 +18,14 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 		return fmt.Errorf("usage: %s", c.Usage())
 	}
 
-	if args[0] == "package" {
+	if args[0] == "js" {
 		executable, err := os.Executable()
 		if err != nil {
 			return fmt.Errorf("unable to determine executable location: %w", err)
 		}
 
 		jsPath := filepath.Join(filepath.Dir(executable), "phishell-js.mjs")
-		args = append(execx.Arguments{"node", jsPath, "--"}, args[1:]...)
+		args = append(execx.Arguments{"node", jsPath, "--", "serve"}, args[1:]...)
 	}
 
 	cmd := execx.Cmd{
@@ -42,7 +42,7 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 	pr := &providerRef{
 		args:    args,
 		process: p,
-		info:    p.Info(),
+		info:    p.Info,
 	}
 
 	c.context.providers = append(c.context.providers, pr)

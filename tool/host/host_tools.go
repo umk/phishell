@@ -10,6 +10,7 @@ import (
 	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/tool/builtin"
 	"github.com/umk/phishell/tool/host/provider"
+	"github.com/umk/phishell/tool/host/provider/schema"
 )
 
 func (h *Host) Tools() ([]openai.ChatCompletionToolParam, error) {
@@ -59,13 +60,13 @@ func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handle
 		return nil, fmt.Errorf("no handler registered for %s", f.Name)
 	}
 
-	req := &provider.Request{
+	req := &schema.Request{
 		CallID: uuid.NewString(),
-		Function: provider.Function{
+		Function: schema.Function{
 			Name:      f.Name,
 			Arguments: f.Arguments,
 		},
-		Context: provider.Context{
+		Context: schema.Context{
 			Dir: wd,
 		},
 	}
@@ -76,7 +77,7 @@ func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handle
 	}, nil
 }
 
-func (h *Host) providerAdd(p *Provider) {
+func (h *Host) providerAdd(p *provider.Provider) {
 	h.providers = append(h.providers, p)
 
 	h.refreshTools()
@@ -84,8 +85,8 @@ func (h *Host) providerAdd(p *Provider) {
 	h.wg.Add(1)
 }
 
-func (h *Host) providerDel(p *Provider) {
-	h.providers = slices.DeleteFunc(h.providers, func(current *Provider) bool {
+func (h *Host) providerDel(p *provider.Provider) {
+	h.providers = slices.DeleteFunc(h.providers, func(current *provider.Provider) bool {
 		return current == p
 	})
 
@@ -106,11 +107,11 @@ func (f *Host) refreshTools() {
 	tools := make(map[string]*providerTool)
 
 	for _, p := range f.providers {
-		if p.info.Status != PsRunning {
+		if p.Info.Status != provider.PsRunning {
 			continue
 		}
 
-		for k, v := range p.process.Tools() {
+		for k, v := range p.Process.Tools() {
 			if _, ok := tools[k]; ok {
 				f.tools = fmt.Errorf("duplicate exports of the tool: %s", k)
 				return

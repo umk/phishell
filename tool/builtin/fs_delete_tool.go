@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/util/marshalx"
 	"github.com/umk/phishell/util/termx"
@@ -50,7 +50,7 @@ func NewFsDeleteToolHandler(argsJSON, baseDir string) (*FsDeleteToolHandler, err
 }
 
 func (h *FsDeleteToolHandler) Execute(ctx context.Context) (any, error) {
-	if bootstrap.Config.Debug {
+	if config.Config.Debug {
 		termx.Muted.Printf("(call) %s; path=%s\n", FsDeleteToolName, h.arguments.Path)
 	}
 

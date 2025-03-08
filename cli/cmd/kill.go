@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strconv"
 
-	"github.com/umk/phishell/tool/host"
+	"github.com/umk/phishell/tool/host/provider"
 	"github.com/umk/phishell/util/execx"
 )
 
@@ -31,10 +31,10 @@ func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 		return fmt.Errorf("no such provider: %d", pid)
 	}
 
-	provider := c.context.providers[n]
-	if provider.process != nil {
-		provider.process.Terminate(host.PsCompleted, "terminated by user")
-		provider.process = nil
+	p := c.context.providers[n]
+	if p.process != nil {
+		p.process.Terminate(provider.PsCompleted, "terminated by user")
+		p.process = nil
 	}
 
 	c.context.providers.refresh()

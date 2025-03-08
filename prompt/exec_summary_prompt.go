@@ -5,14 +5,13 @@ import (
 	_ "embed"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/prompt/client"
+	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/prompt/msg"
 	"github.com/umk/phishell/util/execx"
 )
 
 type ExecSummaryPromptParams struct {
-	Client      *bootstrap.ClientRef
+	Client      *client.Ref
 	CommandLine string
 	ExitCode    int
 	Output      execx.ProcessOutput

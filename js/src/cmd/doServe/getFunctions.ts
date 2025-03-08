@@ -1,4 +1,5 @@
 import {
+  getPackageInfo,
   getPackageSchema,
   JsonSchema,
   JsonSchemaObject,
@@ -52,10 +53,16 @@ function getFunction(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   p: any,
 ): FunctionInfo {
-  if ('error' in f) throw new FunctionError(f.error)
+  if ('error' in f) {
+    throw new FunctionError(f.error)
+  }
   const handler = p[f.name]
-  if (handler === undefined) throw new FunctionError('handler is not exported')
-  if (typeof handler !== 'function') throw new FunctionError('handler is not a function')
+  if (handler === undefined) {
+    throw new FunctionError('handler is not exported')
+  }
+  if (typeof handler !== 'function') {
+    throw new FunctionError('handler is not a function')
+  }
   if (f.signature.parameters.length > 1) {
     throw new FunctionError('handler cannot define more than one parameter')
   }
@@ -77,17 +84,27 @@ function getParameterSchema(schema: JsonSchema | undefined): FunctionParameterSc
 
 async function getFunctions(
   packageDir: string,
-  info: PackageInfo,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   p: any,
 ): Promise<Array<FunctionInfo>> {
-  if (!info.types) throw new Error("The package doesn't have a reference to types")
+  let packageInfo: PackageInfo
+  try {
+    packageInfo = await getPackageInfo(packageDir)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw new Error(`Cannot get package information: ${error.message}`)
+  }
+  if (!packageInfo.types) {
+    throw new Error("The package doesn't have a reference to types")
+  }
   const functions: Array<FunctionInfo> = []
   try {
-    const fns = await getPackageSchema(packageDir, info.types)
+    const fns = await getPackageSchema(packageDir, packageInfo.types)
     const results = fns.map((f) => processFunctionDefinition(f, functions, p))
     const hasErrors = results.includes(false)
-    if (hasErrors) throw new Error('Some functions could not be loaded')
+    if (hasErrors) {
+      throw new Error('Some functions could not be loaded')
+    }
     if (functions.length === 0) {
       throw new Error("The package doesn't export any functions or all of them could not be loaded")
     }

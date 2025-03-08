@@ -1,4 +1,4 @@
-package bootstrap
+package config
 
 import (
 	"errors"
@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"maps"
 
 	"github.com/umk/phishell/util/marshalx"
 )
@@ -41,13 +43,13 @@ func loadConfigFiles(currentDir string) (*ConfigFile, error) {
 	}
 
 	homeConfigPath := filepath.Join(homeDir, ".phishell.yaml")
-	if err := LoadConfigFile(homeConfigPath, &config, true); err != nil {
+	if err := LoadConfigFile(homeConfigPath, &config); err != nil {
 		return nil, err
 	}
 
 	if homeDir != currentDir {
 		dirConfigPath := filepath.Join(currentDir, ".phishell.yaml")
-		if err := LoadConfigFile(dirConfigPath, &config, false); err != nil {
+		if err := LoadConfigFile(dirConfigPath, &config); err != nil {
 			return nil, err
 		}
 	}
@@ -56,7 +58,7 @@ func loadConfigFiles(currentDir string) (*ConfigFile, error) {
 }
 
 // LoadConfigFile reads a YAML configuration file and updates combined config.
-func LoadConfigFile(path string, config *ConfigFile, isGlobal bool) error {
+func LoadConfigFile(path string, config *ConfigFile) error {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		// If the file does not exist, skip without error
@@ -84,14 +86,12 @@ func LoadConfigFile(path string, config *ConfigFile, isGlobal bool) error {
 		config.Default = current.Default
 	}
 
-	for k, v := range current.Profiles {
-		config.Profiles[k] = v
-	}
+	maps.Copy(config.Profiles, current.Profiles)
 
 	return nil
 }
 
-func setServiceFromProfileOrPreset(target *ConfigService, source *ConfigFileProfile) error {
+func setServiceFromProfileOrPreset(target *Profile, source *ConfigFileProfile) error {
 	if source.Preset != nil {
 		preset, ok := presets[*source.Preset]
 		if !ok {
@@ -110,7 +110,7 @@ func setServiceFromProfileOrPreset(target *ConfigService, source *ConfigFileProf
 	return nil
 }
 
-func setServiceFromProfile(target *ConfigService, source *ConfigFileProfile) error {
+func setServiceFromProfile(target *Profile, source *ConfigFileProfile) error {
 	if source.BaseURL != "" {
 		target.BaseURL = source.BaseURL
 	}

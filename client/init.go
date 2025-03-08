@@ -1,35 +1,46 @@
-package bootstrap
+package client
 
 import (
 	"context"
+	"errors"
 
 	"github.com/openai/openai-go"
 	"github.com/openai/openai-go/option"
+	"github.com/umk/phishell/config"
 )
 
-var Clients []*ClientRef
+var Clients []*Ref
 
-func InitClients() {
-	for _, p := range Config.Services {
-		Clients = append(Clients, &ClientRef{
+var Default *Ref
+
+func Init() error {
+	if len(config.Config.Profiles) == 0 {
+		return errors.New("no profiles defined")
+	}
+
+	for _, p := range config.Config.Profiles {
+		Clients = append(Clients, &Ref{
 			Config: p,
 			Client: getClient(p),
 		})
 	}
+
+	Default = Clients[0]
+	return nil
 }
 
-type ClientRef struct {
-	Config *ConfigService
+type Ref struct {
+	Config *config.Profile
 	Client *openai.Client
 }
 
 type RequestCallback func(client *openai.Client) error
 
-func (c *ClientRef) Request(ctx context.Context, cb RequestCallback) error {
+func (c *Ref) Request(ctx context.Context, cb RequestCallback) error {
 	return cb(c.Client)
 }
 
-func getClient(config *ConfigService) *openai.Client {
+func getClient(config *config.Profile) *openai.Client {
 	var opts []option.RequestOption
 
 	if config.BaseURL != "" {
@@ -44,7 +55,7 @@ func getClient(config *ConfigService) *openai.Client {
 
 // GetClient gets the default client to use outside of the chat context
 // where user can pick the client explicitly.
-func GetDefaultClient() *ClientRef {
+func GetDefaultClient() *Ref {
 	if len(Clients) == 0 {
 		panic("no clients defined")
 	}

@@ -15,7 +15,7 @@ esbuild
     bundle: true,
     minify: true,
     platform: 'node',
-    outfile: 'bin/persona.mjs',
+    outfile: 'bin/phishell-js.mjs',
     target: ['node18'],
     format: 'esm',
     external: ['readline/promises'],

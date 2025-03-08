@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/util/fsx"
 	"github.com/umk/phishell/util/marshalx"
@@ -49,7 +49,7 @@ func NewFsReadToolHandler(argsJSON, baseDir string) (*FsReadToolHandler, error) 
 }
 
 func (h *FsReadToolHandler) Execute(ctx context.Context) (any, error) {
-	if bootstrap.Config.Debug {
+	if config.Config.Debug {
 		termx.Muted.Printf("(call) %s; path=%s\n", FsReadToolName, h.arguments.Path)
 	}
 

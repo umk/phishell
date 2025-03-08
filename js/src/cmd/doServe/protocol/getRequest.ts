@@ -1,6 +1,7 @@
-import Ajv from './Ajv'
-import { REQUEST_SCHEMA } from './schemas'
+import Ajv from '../../../common/Ajv'
+
 import ToolRequest from './ToolRequest'
+import { REQUEST_SCHEMA } from './schemas'
 
 function getRequest(value: string): ToolRequest {
   const request = JSON.parse(value)

@@ -4,12 +4,11 @@ import (
 	"context"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
-	"github.com/umk/phishell/prompt/client"
+	"github.com/umk/phishell/client"
 )
 
 type UserPromptParams struct {
-	Client   *bootstrap.ClientRef
+	Client   *client.Ref
 	Messages []openai.ChatCompletionMessageParamUnion
 	Tools    []openai.ChatCompletionToolParam
 }

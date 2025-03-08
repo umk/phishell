@@ -4,36 +4,39 @@ import (
 	"context"
 	_ "embed"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"os"
 
-	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli"
+	"github.com/umk/phishell/client"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/termx"
 )
+
+//go:embed LOGO
+var logo string
 
 //go:embed VERSION
 var version string
 
 func main() {
-	if !termx.IsInteractive() {
-		os.Exit(1)
-	}
-
-	if err := bootstrap.InitConfig(); err != nil {
+	if err := config.Init(); err != nil {
 		termx.Error.Printf("error loading config: %v\n", err)
 		os.Exit(1)
 	}
 
-	bootstrap.InitClients()
-
-	if bootstrap.Config.Version {
-		fmt.Println(version)
-		os.Exit(0)
+	if !termx.IsInteractive() {
+		os.Exit(1)
 	}
+
+	if err := client.Init(); err != nil {
+		termx.Error.Printf("error creating clients: %v\n", err)
+		os.Exit(1)
+	}
+
+	printLogo()
 
 	ctx := context.Background()
 
@@ -43,6 +46,11 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+func printLogo() {
+	termx.Logo.Println(logo)
+	termx.Logo.Printf("v%s\n", version)
 }
 
 func runCli(ctx context.Context) error {

@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/umk/phishell/tool/host/provider"
+	"github.com/umk/phishell/tool/host/provider/schema"
 )
 
-func (p *Process) requestSend(req *provider.Request) (chan any, error) {
+func (p *Process) requestSend(req *schema.Request) (chan any, error) {
 	content, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
@@ -33,7 +33,7 @@ func (p *Process) requestSend(req *provider.Request) (chan any, error) {
 	return ch, nil
 }
 
-func (p *Process) requestResolve(res *provider.Response) {
+func (p *Process) requestResolve(res *schema.Response) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 

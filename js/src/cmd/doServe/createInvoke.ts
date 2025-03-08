@@ -1,7 +1,8 @@
-import Ajv from './Ajv'
-import { FunctionInfo } from './getFunctions'
-import ToolRequest from './ToolRequest'
+import Ajv from '../../common/Ajv'
+
 import Context from './Context'
+import { FunctionInfo } from './getFunctions'
+import { ToolRequest } from './protocol'
 
 function createInvoke(context: Context) {
   const functions = context.functions.reduce((prev, cur) => {

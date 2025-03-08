@@ -36,7 +36,7 @@ func (c *HelpCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	}
 
 	printer := termx.NewPrinter()
-	printer.Printf("# Commands\n\n%s", strings.Join(commands, "\n"))
+	printer.Printf("# Commands\n\n%s\n\nPress the `Tab` key to cycle through the chat profiles and return to the command line.", strings.Join(commands, "\n"))
 
 	return nil
 }

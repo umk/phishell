@@ -6,7 +6,7 @@ import (
 	"runtime"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
+	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/prompt"
 	"github.com/umk/phishell/prompt/msg"
 	"github.com/umk/phishell/tool/host"
@@ -18,7 +18,7 @@ type Thread struct {
 	history *History
 	frame   *MessagesFrame
 
-	client *bootstrap.ClientRef
+	client *client.Ref
 	host   *host.Host
 
 	tools []openai.ChatCompletionToolParam
@@ -26,7 +26,7 @@ type Thread struct {
 	printer *termx.Printer
 }
 
-func NewThread(history *History, client *bootstrap.ClientRef, host *host.Host) (*Thread, error) {
+func NewThread(history *History, ref *client.Ref, host *host.Host) (*Thread, error) {
 	tools, err := host.Tools()
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func NewThread(history *History, client *bootstrap.ClientRef, host *host.Host) (
 		history: h,
 		frame:   &h.Frames[len(h.Frames)-1],
 
-		client: client,
+		client: ref,
 		host:   host,
 
 		// Save for consistency across the rounds of LLM calls even if some of

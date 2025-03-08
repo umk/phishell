@@ -1,4 +1,4 @@
-package bootstrap
+package config
 
 import (
 	"flag"
@@ -12,12 +12,11 @@ import (
 var Config struct {
 	Dir           string `validate:"required"`
 	Debug         bool
-	Version       bool
-	Services      []*ConfigService `validate:"dive"`
+	Profiles      []*Profile `validate:"dive"`
 	OutputBufSize int
 }
 
-type ConfigService struct {
+type Profile struct {
 	Profile string
 
 	BaseURL string `validate:"required,url"`
@@ -30,10 +29,8 @@ type ConfigService struct {
 	ContextSize int `validate:"required,min=2000"`
 }
 
-type ConfigSource int
-
-// InitConfig reads configuration from flags, environment variables, and config files.
-func InitConfig() error {
+// Init reads configuration from flags, environment variables, and config files.
+func Init() error {
 	// Define command-line flags
 	flag.Usage = func() {
 		w := flag.CommandLine.Output()
@@ -45,9 +42,7 @@ func InitConfig() error {
 	var serviceProfIds flagx.Strings
 
 	flag.StringVar(&Config.Dir, "dir", "", "base directory (default current directory)")
-	flag.Var(&serviceProfIds, "profile", "configuration profile")
-	flag.BoolVar(&Config.Debug, "debug", false, "debug interactions")
-	flag.BoolVar(&Config.Version, "v", false, "show version and quit")
+	flag.Var(&serviceProfIds, "profile", "configuration profile to use")
 
 	// Parse the flags
 	flag.Parse()
@@ -86,6 +81,7 @@ func InitConfig() error {
 
 	// Initialize Config with default values
 	Config.OutputBufSize = 512 * 1024
+	_, Config.Debug = os.LookupEnv("DEBUG")
 
 	processedIds := make(map[string]bool)
 
@@ -94,13 +90,13 @@ func InitConfig() error {
 			continue
 		}
 
-		service := createDefaultService(id)
-		Config.Services = append(Config.Services, service)
+		profile := createDefaultService(id)
+		Config.Profiles = append(Config.Profiles, profile)
 
 		processedIds[id] = true
 	}
 
-	for _, p := range Config.Services {
+	for _, p := range Config.Profiles {
 		if err := setServiceFromConfigFile(p, f); err != nil {
 			return err
 		}
@@ -116,7 +112,7 @@ func InitConfig() error {
 	return nil
 }
 
-func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
+func setServiceFromConfigFile(target *Profile, source *ConfigFile) error {
 	profile, ok := source.Profiles[target.Profile]
 	if !ok {
 		return fmt.Errorf("profile not found: %q", target.Profile)
@@ -130,19 +126,19 @@ func setServiceFromConfigFile(target *ConfigService, source *ConfigFile) error {
 }
 
 func loadEnvVars() {
-	for _, p := range Config.Services {
-		if p.Key == "" {
-			if v, ok := os.LookupEnv("PHI_KEY"); ok {
+	if v, ok := os.LookupEnv("PHI_SHELL_KEY"); ok {
+		for _, p := range Config.Profiles {
+			if p.Key == "" {
 				p.Key = v
-
-				os.Unsetenv("PHI_KEY")
 			}
 		}
+
+		os.Unsetenv("PHI_SHELL_KEY")
 	}
 }
 
-func createDefaultService(profile string) *ConfigService {
-	return &ConfigService{
+func createDefaultService(profile string) *Profile {
+	return &Profile{
 		Profile: profile,
 
 		Concurrency: 1,

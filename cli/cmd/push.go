@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/umk/phishell/bootstrap"
+	"github.com/umk/phishell/client"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/prompt/msg"
 	"github.com/umk/phishell/response"
 	"github.com/umk/phishell/util/execx"
@@ -36,7 +37,7 @@ func (c *PushCommand) Info() string {
 func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error {
 	cmd := exec.CommandContext(ctx, args[0], args[1:]...)
 
-	logger := execx.Log(cmd, bootstrap.Config.OutputBufSize)
+	logger := execx.Log(cmd, config.Config.OutputBufSize)
 
 	exitCode, err := execx.Run(cmd)
 	if err != nil {
@@ -52,8 +53,7 @@ func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error 
 		return err
 	}
 
-	cr := bootstrap.GetDefaultClient()
-	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
+	outputStr, err := response.GetExecOutput(ctx, client.Default, &response.ExecOutputParams{
 		CommandLine: args.String(),
 		ExitCode:    exitCode,
 		Output:      processOut,
@@ -82,8 +82,7 @@ func (c *PushCommand) pushPrevious(ctx context.Context) error {
 		return errors.New("no previous command output to push")
 	}
 
-	cr := bootstrap.GetDefaultClient()
-	outputStr, err := response.GetExecOutput(ctx, cr, &response.ExecOutputParams{
+	outputStr, err := response.GetExecOutput(ctx, client.Default, &response.ExecOutputParams{
 		CommandLine: session.PreviousOut.CommandLine,
 		ExitCode:    session.PreviousOut.ExitCode,
 		Output:      session.PreviousOut.Output,

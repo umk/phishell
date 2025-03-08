@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/bootstrap"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/util/termx"
 	"golang.org/x/sync/semaphore"
 )
@@ -16,7 +16,7 @@ const (
 )
 
 type Client struct {
-	*bootstrap.ClientRef
+	*Ref
 
 	s       *semaphore.Weighted
 	Samples *Samples
@@ -48,7 +48,7 @@ func (c *Client) Completion(ctx context.Context, params openai.ChatCompletionNew
 		totalToks := compl.Usage.TotalTokens
 		bytesPerTok := c.Samples.BytesPerTok()
 
-		if bootstrap.Config.Debug {
+		if config.Config.Debug {
 			termx.Muted.Printf("(messages=%d; prompt=%d; completion=%d; total=%d; bytes per tok=%.2f)\n",
 				messages, promptToks, complToks, totalToks, bytesPerTok,
 			)

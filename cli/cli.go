@@ -8,9 +8,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/umk/phishell/bootstrap"
 	"github.com/umk/phishell/cli/cmd"
 	"github.com/umk/phishell/cli/session"
+	"github.com/umk/phishell/client"
+	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/termx"
 )
@@ -39,7 +40,7 @@ func NewCli() *Cli {
 }
 
 func (c *Cli) Init(ctx context.Context) error {
-	if err := os.Chdir(bootstrap.Config.Dir); err != nil {
+	if err := os.Chdir(config.Config.Dir); err != nil {
 		return err
 	}
 
@@ -66,13 +67,13 @@ func (c *Cli) Run(ctx context.Context) error {
 	}
 }
 
-func (c *Cli) getClient(ctx context.Context) *bootstrap.ClientRef {
+func (c *Cli) getClient(ctx context.Context) *client.Ref {
 	n := int(c.mode) - int(PrChat)
 	if n < 0 {
 		panic("prompt is not in a chat mode")
 	}
 
-	return bootstrap.Clients[n]
+	return client.Clients[n]
 }
 
 func cancelOnSigTerm() func(context.Context) context.Context {
