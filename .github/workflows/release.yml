@@ -27,9 +27,10 @@ jobs:
           if [ "${{ matrix.os }}" = "windows" ]; then EXT=".exe"; else EXT=""; fi
           echo -n "${{ github.ref_name }}-${{ matrix.os }}-${{ matrix.arch }}" > VERSION
           mkdir -p dist/phishell-${{ matrix.os }}-${{ matrix.arch }}
+          npm install -C ./js
           GOOS=${{ matrix.os }} GOARCH=${{ matrix.arch }} \
           go build -o dist/phishell-${{ matrix.os }}-${{ matrix.arch }}/phishell${EXT} .
-          OUTPUT_PATH=dist/phishell-${{ matrix.os }}-${{ matrix.arch }}/phishell${EXT} npm run build:release -C ./js
+          OUTPUT_PATH=../dist/phishell-${{ matrix.os }}-${{ matrix.arch }}/phishell-js.mjs npm run build:release -C ./js
 
       - name: Compress binary
         run: |
