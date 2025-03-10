@@ -14,7 +14,7 @@ type ResetCommand struct {
 
 func (c *ResetCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return fmt.Errorf("usage: %s", c.Usage())
+		return getUsageError(c)
 	}
 
 	c.context.session.History = new(thread.History)
@@ -24,10 +24,10 @@ func (c *ResetCommand) Execute(ctx context.Context, args execx.Arguments) error 
 	return nil
 }
 
-func (c *ResetCommand) Usage() string {
-	return "reset"
+func (c *ResetCommand) Usage() []string {
+	return []string{"reset"}
 }
 
-func (c *ResetCommand) Info() string {
-	return "reset chat history"
+func (c *ResetCommand) Info() []string {
+	return []string{"reset chat history"}
 }

@@ -12,7 +12,7 @@ type PwdCommand struct{}
 
 func (c *PwdCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return fmt.Errorf("usage: %s", c.Usage())
+		return getUsageError(c)
 	}
 
 	workingDir, err := os.Getwd()
@@ -24,10 +24,10 @@ func (c *PwdCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	return nil
 }
 
-func (c *PwdCommand) Usage() string {
-	return "pwd"
+func (c *PwdCommand) Usage() []string {
+	return []string{"pwd"}
 }
 
-func (p *PwdCommand) Info() string {
-	return "print the current directory"
+func (p *PwdCommand) Info() []string {
+	return []string{"print the current directory"}
 }

@@ -26,12 +26,12 @@ func (c *PushCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	return c.pushExec(ctx, args)
 }
 
-func (c *PushCommand) Usage() string {
-	return "push <cmd>"
+func (c *PushCommand) Usage() []string {
+	return []string{"push <cmd>"}
 }
 
-func (c *PushCommand) Info() string {
-	return "run non-interactive command and push result to chat history"
+func (c *PushCommand) Info() []string {
+	return []string{"run non-interactive command and push result to chat history"}
 }
 
 func (c *PushCommand) pushExec(ctx context.Context, args execx.Arguments) error {

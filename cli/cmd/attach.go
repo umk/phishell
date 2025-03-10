@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/umk/phishell/util/execx"
+	"github.com/umk/phishell/util/fsx"
 )
 
 type AttachCommand struct {
@@ -15,23 +16,44 @@ type AttachCommand struct {
 
 func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: %s", c.Usage())
+		return getUsageError(c)
 	}
 
-	if args[0] == "js" {
+	var cmd execx.Cmd
+
+	if args[0] == "persona" {
+		var dir string
+
+		switch len(args) {
+		case 1:
+			// Do nothing
+		case 2:
+			wd, err := os.Getwd()
+			if err != nil {
+				return fmt.Errorf("unable to get current working directory: %w", err)
+			}
+			dir = fsx.Resolve(wd, args[1])
+		default:
+			return getUsageError(c)
+		}
+
 		executable, err := os.Executable()
 		if err != nil {
 			return fmt.Errorf("unable to determine executable location: %w", err)
 		}
 
 		jsPath := filepath.Join(filepath.Dir(executable), "phishell-js.mjs")
-		args = append(execx.Arguments{"node", jsPath, "--", "serve"}, args[1:]...)
-	}
-
-	cmd := execx.Cmd{
-		Cmd:  args[0],
-		Args: args[1:],
-		Env:  append(os.Environ(), "PHI_SHELL=1"),
+		cmd = execx.Cmd{
+			Cmd:  "node",
+			Args: []string{jsPath, "--", "serve"},
+			Dir:  dir,
+		}
+	} else {
+		cmd = execx.Cmd{
+			Cmd:  args[0],
+			Args: args[1:],
+			Env:  append(os.Environ(), "PHI_SHELL=1"),
+		}
 	}
 
 	p, err := c.context.session.Host.Execute(&cmd)
@@ -52,10 +74,16 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 	return nil
 }
 
-func (c *AttachCommand) Usage() string {
-	return "attach [cmd]"
+func (c *AttachCommand) Usage() []string {
+	return []string{
+		"attach [cmd]",
+		"attach persona [path]",
+	}
 }
 
-func (p *AttachCommand) Info() string {
-	return "run tools provider in background"
+func (p *AttachCommand) Info() []string {
+	return []string{
+		"run tools provider in background",
+		"attach Node.js package that implements tools",
+	}
 }

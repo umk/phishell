@@ -10,11 +10,13 @@ type Cmd struct {
 	Env  []string
 	Cmd  string
 	Args []string
+	Dir  string
 }
 
 func (c *Cmd) Command() *exec.Cmd {
 	cmd := exec.Command(c.Cmd, c.Args...)
 	cmd.Env = c.Env
+	cmd.Dir = c.Dir
 
 	return cmd
 }

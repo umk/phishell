@@ -16,7 +16,7 @@ type KillCommand struct {
 
 func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) != 1 {
-		return fmt.Errorf("usage: %s", c.Usage())
+		return getUsageError(c)
 	}
 	pidStr := args[0]
 	pid, err := strconv.Atoi(pidStr)
@@ -44,10 +44,10 @@ func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	return nil
 }
 
-func (c *KillCommand) Usage() string {
-	return "kill [pid]"
+func (c *KillCommand) Usage() []string {
+	return []string{"kill [pid]"}
 }
 
-func (k *KillCommand) Info() string {
-	return "kill a tools provider with the given PID"
+func (k *KillCommand) Info() []string {
+	return []string{"kill a tools provider with the given PID"}
 }

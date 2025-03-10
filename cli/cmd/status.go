@@ -15,7 +15,7 @@ type StatusCommand struct {
 
 func (c *StatusCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return fmt.Errorf("usage: %s", c.Usage())
+		return getUsageError(c)
 	}
 
 	c.context.providers.refresh()
@@ -48,10 +48,10 @@ func (c *StatusCommand) Execute(ctx context.Context, args execx.Arguments) error
 	return nil
 }
 
-func (c *StatusCommand) Usage() string {
-	return "status"
+func (c *StatusCommand) Usage() []string {
+	return []string{"status"}
 }
 
-func (c *StatusCommand) Info() string {
-	return "list tool providers"
+func (c *StatusCommand) Info() []string {
+	return []string{"list tool providers"}
 }

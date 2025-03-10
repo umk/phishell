@@ -17,7 +17,7 @@ type HelpCommand struct {
 
 func (c *HelpCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return fmt.Errorf("usage: %s", c.Usage())
+		return getUsageError(c)
 	}
 
 	var names []string
@@ -31,8 +31,12 @@ func (c *HelpCommand) Execute(ctx context.Context, args execx.Arguments) error {
 
 	for _, name := range names {
 		command := c.context.commands[name]
-		info := fmt.Sprintf(" - `%s` %s", command.Usage(), command.Info())
-		commands = append(commands, info)
+		usage := command.Usage()
+		info := command.Info()
+		for i := 0; i < len(usage) && i < len(info); i++ {
+			commandInfo := fmt.Sprintf(" - `%s` %s", usage[i], info[i])
+			commands = append(commands, commandInfo)
+		}
 	}
 
 	printer := termx.NewPrinter()
@@ -41,10 +45,10 @@ func (c *HelpCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	return nil
 }
 
-func (c *HelpCommand) Usage() string {
-	return "help"
+func (c *HelpCommand) Usage() []string {
+	return []string{"help"}
 }
 
-func (c *HelpCommand) Info() string {
-	return "display the help message"
+func (c *HelpCommand) Info() []string {
+	return []string{"display the help message"}
 }

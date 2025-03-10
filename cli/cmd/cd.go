@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/umk/phishell/util/execx"
@@ -14,7 +13,7 @@ type CdCommand struct {
 
 func (c *CdCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 1 {
-		return fmt.Errorf("usage: %s", c.Usage())
+		return getUsageError(c)
 	}
 
 	var dir string
@@ -37,10 +36,10 @@ func (c *CdCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	return nil
 }
 
-func (c *CdCommand) Usage() string {
-	return "cd <dir>"
+func (c *CdCommand) Usage() []string {
+	return []string{"cd <dir>"}
 }
 
-func (c *CdCommand) Info() string {
-	return "change the current directory"
+func (c *CdCommand) Info() []string {
+	return []string{"change the current directory"}
 }
