@@ -50,7 +50,7 @@ func main() {
 
 func printLogo() {
 	termx.Logo.Println(logo)
-	termx.Logo.Printf("v%s\n", version)
+	termx.Logo.Println(version)
 }
 
 func runCli(ctx context.Context) error {
