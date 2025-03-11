@@ -1,11 +1,24 @@
 import chokidar from 'chokidar'
 
 import Context, { createContext } from './Context'
+import buildPackage from './buildPackage'
 import createInvoke from './createInvoke'
+import getPackageInfo, { PackageInfo } from './getPackageInfo'
 import { getRequest, readRequests, writeHeader, writeResponse } from './protocol'
 
 async function doServe() {
-  const context = await createContext()
+  const packageDir = process.cwd()
+  let packageInfo: PackageInfo
+  try {
+    packageInfo = await getPackageInfo(packageDir)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    throw new Error(`Cannot get package information: ${error.message}`)
+  }
+
+  await buildPackage(packageDir, packageInfo)
+
+  const context = await createContext(packageDir, packageInfo)
   const invoke = createInvoke(context)
 
   writeHeader(context)

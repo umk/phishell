@@ -20,40 +20,15 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 	}
 
 	var cmd execx.Cmd
+	var err error
 
 	if args[0] == "persona" {
-		var dir string
-
-		switch len(args) {
-		case 1:
-			// Do nothing
-		case 2:
-			wd, err := os.Getwd()
-			if err != nil {
-				return fmt.Errorf("unable to get current working directory: %w", err)
-			}
-			dir = fsx.Resolve(wd, args[1])
-		default:
-			return ErrInvalidArgs
-		}
-
-		executable, err := os.Executable()
+		cmd, err = createAttachPersona(args)
 		if err != nil {
-			return fmt.Errorf("unable to determine executable location: %w", err)
-		}
-
-		jsPath := filepath.Join(filepath.Dir(executable), "phishell-js.mjs")
-		cmd = execx.Cmd{
-			Cmd:  "node",
-			Args: []string{jsPath, "--", "serve"},
-			Dir:  dir,
+			return err
 		}
 	} else {
-		cmd = execx.Cmd{
-			Cmd:  args[0],
-			Args: args[1:],
-			Env:  append(os.Environ(), "PHI_SHELL=1"),
-		}
+		cmd = createAttachGeneric(args)
 	}
 
 	p, err := c.context.session.Host.Execute(&cmd)
@@ -85,5 +60,43 @@ func (p *AttachCommand) Info() []string {
 	return []string{
 		"run tools provider in background",
 		"attach Node.js package that implements tools",
+	}
+}
+
+func createAttachPersona(args execx.Arguments) (execx.Cmd, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return execx.Cmd{}, fmt.Errorf("unable to get current working directory: %w", err)
+	}
+
+	var dir string
+
+	switch len(args) {
+	case 1:
+		dir = wd
+	case 2:
+		dir = fsx.Resolve(wd, args[1])
+	default:
+		return execx.Cmd{}, ErrInvalidArgs
+	}
+
+	executable, err := os.Executable()
+	if err != nil {
+		return execx.Cmd{}, fmt.Errorf("unable to determine executable location: %w", err)
+	}
+
+	jsPath := filepath.Join(filepath.Dir(executable), "phishell-js.mjs")
+	return execx.Cmd{
+		Cmd:  "node",
+		Args: []string{jsPath, "--", "serve"},
+		Dir:  dir,
+	}, nil
+}
+
+func createAttachGeneric(args execx.Arguments) execx.Cmd {
+	return execx.Cmd{
+		Cmd:  args[0],
+		Args: args[1:],
+		Env:  append(os.Environ(), "PHI_SHELL=1"),
 	}
 }

@@ -4,6 +4,7 @@ import path from 'path'
 export type PackageInfo = {
   isESModule: boolean
   modulePath: string
+  scripts: Set<string>
 }
 
 async function getPackageInfo(packageDir: string): Promise<PackageInfo> {
@@ -16,7 +17,9 @@ async function getPackageInfo(packageDir: string): Promise<PackageInfo> {
   const mainFile = packageJson.main || 'index.js'
   const modulePath = path.join(packageDir, mainFile)
 
-  return { isESModule, modulePath }
+  const scripts = new Set<string>(Object.keys(packageJson.scripts ?? {}))
+
+  return { isESModule, modulePath, scripts }
 }
 
 export default getPackageInfo
