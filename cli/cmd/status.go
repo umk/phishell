@@ -15,7 +15,7 @@ type StatusCommand struct {
 
 func (c *StatusCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 
 	c.context.providers.refresh()

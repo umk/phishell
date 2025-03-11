@@ -13,7 +13,7 @@ type CdCommand struct {
 
 func (c *CdCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 1 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 
 	var dir string

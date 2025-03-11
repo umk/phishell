@@ -16,7 +16,7 @@ type AttachCommand struct {
 
 func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) < 1 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 
 	var cmd execx.Cmd
@@ -34,7 +34,7 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 			}
 			dir = fsx.Resolve(wd, args[1])
 		default:
-			return getUsageError(c)
+			return ErrInvalidArgs
 		}
 
 		executable, err := os.Executable()

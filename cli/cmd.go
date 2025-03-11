@@ -7,7 +7,10 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
+	"unicode/utf8"
 
+	"github.com/umk/phishell/cli/cmd"
 	"github.com/umk/phishell/cli/session"
 	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/util/execx"
@@ -43,21 +46,30 @@ func (c *Cli) processCommand(ctx context.Context, content string) error {
 			return nil
 		}
 
-		cmd, err := args.Cmd()
+		execCmd, err := args.Cmd()
 		if err != nil {
 			return err
 		}
 
-		if b, ok := c.commands.Command(cmd.Cmd); ok {
+		if b, ok := c.commands.Command(execCmd.Cmd); ok {
 			if len(piped) > 1 {
 				return errors.New("cannot pipe built-in command")
 			}
 
-			if len(cmd.Env) > 0 {
+			if len(execCmd.Env) > 0 {
 				return errors.New("cannot assign environment variables when calling built-in command")
 			}
 
-			return b.Execute(ctx, cmd.Args)
+			if err := b.Execute(ctx, execCmd.Args); err != nil {
+				if err == cmd.ErrInvalidArgs {
+					printUsageError(b)
+					return nil
+				} else {
+					return err
+				}
+			}
+
+			return nil
 		}
 	}
 
@@ -117,4 +129,18 @@ func (c *Cli) processExternalCommand(ctx context.Context, piped []execx.Argument
 	}
 
 	return nil
+}
+
+func printUsageError(c cmd.Command) {
+	const UsagePrefix = "usage: "
+	padding := strings.Repeat(" ", utf8.RuneCountInString(UsagePrefix))
+
+	for i, usage := range c.Usage() {
+		if i == 0 {
+			fmt.Print(UsagePrefix)
+		} else {
+			fmt.Print(padding)
+		}
+		fmt.Println(usage)
+	}
 }

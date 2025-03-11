@@ -15,7 +15,7 @@ type ExportCommand struct{}
 
 func (c *ExportCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 1 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 
 	if len(args) == 1 {

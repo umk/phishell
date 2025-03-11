@@ -12,7 +12,7 @@ type PwdCommand struct{}
 
 func (c *PwdCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 
 	workingDir, err := os.Getwd()

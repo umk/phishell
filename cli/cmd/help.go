@@ -17,7 +17,7 @@ type HelpCommand struct {
 
 func (c *HelpCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 
 	var names []string

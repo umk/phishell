@@ -16,19 +16,19 @@ type KillCommand struct {
 
 func (c *KillCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) != 1 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 	pidStr := args[0]
 	pid, err := strconv.Atoi(pidStr)
 	if err != nil {
-		return err
+		return ErrInvalidArgs
 	}
 
 	n := slices.IndexFunc(c.context.providers, func(provider *providerRef) bool {
 		return provider.info.Pid == pid
 	})
 	if n == -1 {
-		return fmt.Errorf("no such provider: %d", pid)
+		return fmt.Errorf("no such provider with PID %d", pid)
 	}
 
 	p := c.context.providers[n]

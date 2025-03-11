@@ -14,7 +14,7 @@ type ResetCommand struct {
 
 func (c *ResetCommand) Execute(ctx context.Context, args execx.Arguments) error {
 	if len(args) > 0 {
-		return getUsageError(c)
+		return ErrInvalidArgs
 	}
 
 	c.context.session.History = new(thread.History)
