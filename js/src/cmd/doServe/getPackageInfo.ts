@@ -14,7 +14,7 @@ async function getPackageInfo(packageDir: string): Promise<PackageInfo> {
   const packageJson = JSON.parse(packageJsonContent)
 
   const isESModule = packageJson.type === 'module'
-  const mainFile = packageJson.main || 'index.js'
+  const mainFile = packageJson.main || 'dist/index.js'
   const modulePath = path.join(packageDir, mainFile)
 
   const scripts = new Set<string>(Object.keys(packageJson.scripts ?? {}))

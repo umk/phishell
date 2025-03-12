@@ -1,9 +1,8 @@
-import parseArguments from './parseArguments'
+import { runCommand } from './cmd'
 
 async function main() {
   try {
-    await parseArguments()
-    process.exit(0)
+    await runCommand()
   } catch (error) {
     process.stderr.write(String(error))
     process.stderr.write('\n')

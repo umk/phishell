@@ -22,8 +22,8 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 	var cmd execx.Cmd
 	var err error
 
-	if args[0] == "persona" {
-		cmd, err = createAttachPersona(args)
+	if args[0] == "js" {
+		cmd, err = createAttachJS(args)
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 func (c *AttachCommand) Usage() []string {
 	return []string{
 		"attach [cmd]",
-		"attach persona [path]",
+		"attach js [path]",
 	}
 }
 
@@ -63,7 +63,7 @@ func (p *AttachCommand) Info() []string {
 	}
 }
 
-func createAttachPersona(args execx.Arguments) (execx.Cmd, error) {
+func createAttachJS(args execx.Arguments) (execx.Cmd, error) {
 	wd, err := os.Getwd()
 	if err != nil {
 		return execx.Cmd{}, fmt.Errorf("unable to get current working directory: %w", err)
