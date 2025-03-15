@@ -70,6 +70,8 @@ github.com/muesli/termenv v0.15.3-0.20240618155329-98d742f6907a h1:2MaM6YC3mGu54
 github.com/muesli/termenv v0.15.3-0.20240618155329-98d742f6907a/go.mod h1:hxSnBBYLK21Vtq/PHd0S2FYCxBXzBua8ov5s1RobyRQ=
 github.com/openai/openai-go v0.1.0-alpha.41 h1:OPRT5YfNKlENfipMtolMWnKbCR1iQDc9hCRsUkhMaK8=
 github.com/openai/openai-go v0.1.0-alpha.41/go.mod h1:3SdE6BffOX9HPEQv8IL/fi3LYZ5TUpRYaqGQZbyk11A=
+github.com/pehringer/simd v1.2.5 h1:AX+hpL+vp0l5/RSXeZkZqR991Bdexv8p/PexQsduT5I=
+github.com/pehringer/simd v1.2.5/go.mod h1:wiosTQfWSFFXzECpp6VY2Kio5Jfo3ppB5Mm+nD/evvw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
