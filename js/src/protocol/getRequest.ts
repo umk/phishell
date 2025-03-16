@@ -1,4 +1,4 @@
-import Ajv from '../../../common/Ajv'
+import Ajv from '../common/Ajv'
 
 import ToolRequest from './ToolRequest'
 import { REQUEST_SCHEMA } from './schemas'

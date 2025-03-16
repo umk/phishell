@@ -1,10 +1,13 @@
+import path from 'path'
+
 import chokidar from 'chokidar'
 
+import { getRequest, printHeader, printResponse, readRequests } from '../../protocol'
+
 import { createContext } from './Context'
-import buildPackage from './buildPackage'
 import createInvoke from './createInvoke'
 import getPackageInfo, { PackageInfo } from './getPackageInfo'
-import { getRequest, readRequests, writeHeader, writeResponse } from './protocol'
+import preparePackage from './preparePackage'
 
 async function doServe() {
   const packageDir = process.cwd()
@@ -16,14 +19,21 @@ async function doServe() {
     throw new Error(`Cannot get package information: ${error.message}`)
   }
 
-  await buildPackage(packageDir, packageInfo)
+  await preparePackage(packageDir, packageInfo)
 
   const context = await createContext(packageDir, packageInfo)
   const invoke = createInvoke(context)
 
-  writeHeader(context)
+  printHeader(
+    context.functions.map((f) => ({
+      name: f.name,
+      description: f.f.signature.description,
+      parameters: f.parameter.schema,
+    })),
+  )
 
-  restartOnChange(packageDir, 3000)
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  restartOnChange(path.dirname(packageInfo.types!), 3000)
 
   for await (const line of readRequests(process.stdin)) {
     const message = line.trim()
@@ -36,7 +46,7 @@ async function doServe() {
       try {
         const result = await invoke(request)
 
-        writeResponse({
+        printResponse({
           call_id: request.call_id,
           content: JSON.stringify(result),
         })
@@ -44,7 +54,7 @@ async function doServe() {
         const message =
           error instanceof Error ? error.message : 'An error has occurred when running the function'
 
-        writeResponse({
+        printResponse({
           call_id: request.call_id,
           content: JSON.stringify(message),
         })

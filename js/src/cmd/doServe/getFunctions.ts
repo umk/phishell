@@ -1,12 +1,12 @@
 import {
-  getPackageInfo,
   getPackageSchema,
   JsonSchema,
   JsonSchemaObject,
   PackageFunction,
   PackageFunctionSignature,
-  PackageInfo,
 } from 'fn-json-schema'
+
+import { PackageInfo } from './getPackageInfo'
 
 const DEFAULT_OBJECT_SCHEMA: JsonSchema & JsonSchemaObject = {
   type: 'object',
@@ -84,16 +84,10 @@ function getParameterSchema(schema: JsonSchema | undefined): FunctionParameterSc
 
 async function getFunctions(
   packageDir: string,
+  packageInfo: PackageInfo,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   p: any,
 ): Promise<Array<FunctionInfo>> {
-  let packageInfo: PackageInfo
-  try {
-    packageInfo = await getPackageInfo(packageDir)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    throw new Error(`Cannot get package information: ${error.message}`)
-  }
   if (!packageInfo.types) {
     throw new Error("The package doesn't have a reference to types")
   }

@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"os/signal"
@@ -13,7 +14,6 @@ import (
 	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/util/errorsx"
-	"github.com/umk/phishell/util/termx"
 )
 
 type PromptMode int
@@ -61,7 +61,7 @@ func (c *Cli) Run(ctx context.Context) error {
 			} else if errorsx.IsCanceled(err) {
 				// Do nothing
 			} else {
-				termx.Error.Println(err)
+				fmt.Fprintln(os.Stderr, err)
 			}
 		}
 	}

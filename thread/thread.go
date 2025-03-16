@@ -3,6 +3,7 @@ package thread
 import (
 	"context"
 	"fmt"
+	"os"
 	"runtime"
 
 	"github.com/openai/openai-go"
@@ -105,7 +106,7 @@ func (t *Thread) Post(ctx context.Context, message string) (*History, error) {
 			if errorsx.IsCanceled(err) {
 				return nil, err
 			}
-			termx.Error.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 		}
 	}
 }

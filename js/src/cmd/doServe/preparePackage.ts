@@ -5,7 +5,7 @@ import { PackageInfo } from './getPackageInfo'
 
 const execPromise = promisify(exec)
 
-async function buildPackage(packageDir: string, packageInfo: PackageInfo) {
+async function preparePackage(packageDir: string, packageInfo: PackageInfo) {
   if (!packageInfo.scripts.has('build')) {
     throw new Error('No build script found in package.json')
   }
@@ -22,4 +22,4 @@ async function buildPackage(packageDir: string, packageInfo: PackageInfo) {
   }
 }
 
-export default buildPackage
+export default preparePackage

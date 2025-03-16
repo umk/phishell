@@ -26,7 +26,7 @@ async function createFunctionsContext(
   } catch (error) {
     throw new Error(`Cannot load package: ${error}`)
   }
-  const functions = await getFunctions(packageDir, p)
+  const functions = await getFunctions(packageDir, packageInfo, p)
   return {
     functions,
     modulePath: packageInfo.modulePath,
