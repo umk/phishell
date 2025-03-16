@@ -23,7 +23,7 @@ func (c *Cli) processPrompt(ctx context.Context) error {
 	case PrCommand:
 		return c.processCommand(ctx, content)
 	case PrChat:
-		client := c.getClient(ctx)
+		client := c.getClient()
 		return c.session.Post(ctx, client, content)
 	}
 

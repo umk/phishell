@@ -97,6 +97,6 @@ func createAttachGeneric(args execx.Arguments) execx.Cmd {
 	return execx.Cmd{
 		Cmd:  args[0],
 		Args: args[1:],
-		Env:  append(os.Environ(), "PHI_SHELL=1"),
+		Env:  append(os.Environ(), "PHISHELL=1"),
 	}
 }

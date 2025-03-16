@@ -18,7 +18,7 @@ func (p *promptChat) GetPrompt(ctx context.Context) string {
 	case PrCommand:
 		return p.getCommandPrompt()
 	default:
-		return p.getChatPrompt(ctx)
+		return p.getChatPrompt()
 	}
 }
 
@@ -45,13 +45,13 @@ func (p *promptChat) GetHint(ctx context.Context) string {
 }
 
 func (p *promptChat) CycleMode(ctx context.Context) {
-	max := int(PrChat) + len(client.Clients)
+	max := int(PrChat) + len(client.ChatProfiles)
 
 	p.cli.mode = PromptMode((int(p.cli.mode) + 1) % max)
 }
 
-func (p *promptChat) getChatPrompt(ctx context.Context) string {
-	client := p.cli.getClient(ctx)
+func (p *promptChat) getChatPrompt() string {
+	client := p.cli.getClient()
 
 	return fmt.Sprintf("%s >>> ", client.Config.Profile)
 }

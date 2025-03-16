@@ -20,10 +20,10 @@ Both files are not mandatory, but at least one of them must exist in order to ru
 
 ```yaml
 profiles:
-    profileA:
-        # configuration of profile A
-    profileB:
-        # configuration of profile B
+  profileA:
+    # configuration of profile A
+  profileB:
+    # configuration of profile B
 
 default: profileB
 ```
@@ -51,7 +51,7 @@ Each of the profiles specify the following data:
         </tr>
         <tr valign="top">
             <td><code>key</code></td>
-            <td>Key to use with the API. Must be specified even for services, which don't require the key (use a random value in this case). Can be replaced with <code>PHI_KEY</code> environment variable, which is applied to all profiles, unless the profile specifies key explicitly. If key is not specified, Phi Shell will ask for the key and preserve it in the key chain under the profile's name.</td>
+            <td>Key to use with the API. Must be specified even for services, which don't require the key (use a random value in this case). Can be replaced with <code>PHISHELL_KEY</code> environment variable, which is applied to all profiles, unless the profile specifies key explicitly. If key is not specified, Phi Shell will ask for the key and preserve it in the key chain under the profile's name.</td>
             <td></td>
         </tr>
         <tr valign="top">
@@ -241,6 +241,7 @@ The communication contracts between the host and provider processes are outlined
   }
 }
 ```
+
 </details>
 
 <details>
@@ -293,6 +294,7 @@ The communication contracts between the host and provider processes are outlined
   }
 }
 ```
+
 </details>
 
 <details>
@@ -315,6 +317,7 @@ The communication contracts between the host and provider processes are outlined
   "required": ["call_id"]
 }
 ```
+
 </details>
 
 ## Built-In Tools

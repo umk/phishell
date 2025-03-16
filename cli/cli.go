@@ -67,13 +67,13 @@ func (c *Cli) Run(ctx context.Context) error {
 	}
 }
 
-func (c *Cli) getClient(ctx context.Context) *client.Ref {
+func (c *Cli) getClient() *client.Ref {
 	n := int(c.mode) - int(PrChat)
 	if n < 0 {
 		panic("prompt is not in a chat mode")
 	}
 
-	return client.Clients[n]
+	return client.ChatProfiles[n]
 }
 
 func cancelOnSigTerm() func(context.Context) context.Context {

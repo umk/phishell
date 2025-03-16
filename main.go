@@ -12,6 +12,7 @@ import (
 	"github.com/umk/phishell/cli"
 	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/config"
+	"github.com/umk/phishell/server"
 	"github.com/umk/phishell/util/errorsx"
 	"github.com/umk/phishell/util/termx"
 )
@@ -20,6 +21,8 @@ import (
 var version string
 
 func main() {
+	ctx := context.Background()
+
 	if err := config.Init(); err != nil {
 		fmt.Fprintf(os.Stderr, "error loading config: %v\n", err)
 		os.Exit(1)
@@ -34,9 +37,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	termx.Logo.Println(version)
+	if err := server.Init(); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: failed to set up server: %v\n", err)
+	} else {
+		os.Setenv("PHISHELL_PROFILE", client.Default.Config.Profile)
+		defer server.Close(ctx)
+	}
 
-	ctx := context.Background()
+	termx.Logo.Println(version)
 
 	if err := runCli(ctx); err != nil {
 		if !errors.Is(err, io.EOF) && !errorsx.IsCanceled(err) {

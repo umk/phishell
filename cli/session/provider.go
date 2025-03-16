@@ -20,7 +20,7 @@ func (s *Session) Attach(cmd string) error {
 	if _, err := s.Host.Execute(&execx.Cmd{
 		Cmd:  args[0][0],
 		Args: args[0][1:],
-		Env:  append(os.Environ(), "PHI_SHELL=1"),
+		Env:  append(os.Environ(), "PHISHELL=1"),
 	}); err != nil {
 		return err
 	}

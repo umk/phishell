@@ -4,15 +4,18 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/umk/phishell/util/flagx"
+	"github.com/umk/phishell/util/slicesx"
 )
 
 var Config struct {
 	Dir           string `validate:"required"`
 	Debug         bool
 	Profiles      []*Profile `validate:"dive"`
+	ChatProfiles  []string
 	OutputBufSize int
 }
 
@@ -34,18 +37,18 @@ func Init() error {
 	// Define command-line flags
 	flag.Usage = func() {
 		w := flag.CommandLine.Output()
-		fmt.Fprint(w, "Usage: hackkd option...\n")
+		fmt.Fprint(w, "Usage: phishell option...\n")
 		fmt.Fprint(w, "Options:\n")
 		flag.PrintDefaults()
 	}
 
-	var serviceProfIds flagx.Strings
-
 	flag.StringVar(&Config.Dir, "dir", "", "base directory (default current directory)")
-	flag.Var(&serviceProfIds, "profile", "configuration profile to use")
+	flag.Var((*flagx.Strings)(&Config.ChatProfiles), "profile", "configuration profile to use")
 
 	// Parse the flags
 	flag.Parse()
+
+	Config.ChatProfiles = slicesx.Unique(Config.ChatProfiles)
 
 	if len(flag.Args()) > 0 {
 		flag.Usage()
@@ -69,42 +72,72 @@ func Init() error {
 	}
 
 	// Getting profile for service client
-	if len(serviceProfIds) == 0 {
+	if len(Config.ChatProfiles) == 0 {
 		defaultProfId := "default"
 
-		if f.Default != nil {
-			defaultProfId = *f.Default
+		if len(f.Profiles) == 1 {
+			for profileId := range f.Profiles {
+				defaultProfId = profileId
+			}
+		} else {
+			if f.Default != nil {
+				defaultProfId = *f.Default
+			}
+
+			if len(f.Profiles) == 0 {
+				f.Profiles[defaultProfId] = &ConfigFileProfile{}
+			}
 		}
 
-		serviceProfIds = append(serviceProfIds, defaultProfId)
+		Config.ChatProfiles = append(Config.ChatProfiles, defaultProfId)
 	}
 
 	// Initialize Config with default values
 	Config.OutputBufSize = 512 * 1024
-	_, Config.Debug = os.LookupEnv("DEBUG")
 
-	processedIds := make(map[string]bool)
-
-	for _, id := range serviceProfIds {
-		if _, ok := processedIds[id]; ok {
-			continue
+	for id, p := range f.Profiles {
+		profile := &Profile{
+			Profile:     id,
+			Concurrency: 1,
 		}
-
-		profile := createDefaultService(id)
-		Config.Profiles = append(Config.Profiles, profile)
-
-		processedIds[id] = true
-	}
-
-	for _, p := range Config.Profiles {
-		if err := setServiceFromConfigFile(p, f); err != nil {
+		if err := setServiceFromProfileOrPreset(profile, p); err != nil {
 			return err
 		}
+
+		Config.Profiles = append(Config.Profiles, profile)
 	}
 
 	loadEnvVars()
 
+	if err := checkConfig(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func checkConfig() error {
 	v := validator.New()
+
+	offset := 0
+	for i, profile := range Config.Profiles {
+		if err := v.Struct(profile); err != nil {
+			if vals, ok := err.(validator.ValidationErrors); ok && len(vals) > 0 {
+				err = fmt.Errorf("invalid field %q", vals[0].Namespace())
+			}
+			if slices.Contains(Config.ChatProfiles, profile.Profile) {
+				return fmt.Errorf("validation failed for profile %q: %w", profile.Profile, err)
+			}
+
+			fmt.Fprintf(os.Stderr, "warning: validation failed for profile %q: %v.\n", profile.Profile, err)
+			offset++
+		} else {
+			Config.Profiles[i-offset] = profile
+		}
+	}
+
+	Config.Profiles = Config.Profiles[:len(Config.Profiles)-offset]
+
 	if err := v.Struct(Config); err != nil {
 		return err
 	}
@@ -112,35 +145,16 @@ func Init() error {
 	return nil
 }
 
-func setServiceFromConfigFile(target *Profile, source *ConfigFile) error {
-	profile, ok := source.Profiles[target.Profile]
-	if !ok {
-		return fmt.Errorf("profile not found: %q", target.Profile)
-	}
-
-	if err := setServiceFromProfileOrPreset(target, profile); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func loadEnvVars() {
-	if v, ok := os.LookupEnv("PHI_SHELL_KEY"); ok {
+	_, Config.Debug = os.LookupEnv("DEBUG")
+
+	if v, ok := os.LookupEnv("PHISHELL_KEY"); ok {
 		for _, p := range Config.Profiles {
 			if p.Key == "" {
 				p.Key = v
 			}
 		}
 
-		os.Unsetenv("PHI_SHELL_KEY")
-	}
-}
-
-func createDefaultService(profile string) *Profile {
-	return &Profile{
-		Profile: profile,
-
-		Concurrency: 1,
+		os.Unsetenv("PHISHELL_KEY")
 	}
 }

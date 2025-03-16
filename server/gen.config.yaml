@@ -1,0 +1,13 @@
+package: server
+generate:
+  client: true
+  std-http-server: true
+  models: true
+output-options:
+  include-tags:
+    - Chat
+    - Completions
+    - Embeddings
+  response-type-suffix: ResponseModel
+  disable-type-aliases-for-type: []
+output: api.go
