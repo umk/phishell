@@ -18,17 +18,17 @@ const (
 type Client struct {
 	*Ref
 
-	s       *semaphore.Weighted
+	S       *semaphore.Weighted
 	Samples *Samples
 }
 
 func (c *Client) Completion(ctx context.Context, params openai.ChatCompletionNewParams) (
 	*openai.ChatCompletion, error,
 ) {
-	if err := c.s.Acquire(ctx, 1); err != nil {
+	if err := c.S.Acquire(ctx, 1); err != nil {
 		return nil, err
 	}
-	defer c.s.Release(1)
+	defer c.S.Release(1)
 
 	var compl *openai.ChatCompletion
 	err := c.Request(ctx, func(client *openai.Client) (err error) {

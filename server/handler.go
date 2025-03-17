@@ -38,13 +38,20 @@ func (h *handler) CreateChatCompletion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, _ := req.Model.AsCreateChatCompletionRequestModel0()
-	c, ok := h.clients[p]
+	base, ok := h.clients[p]
 	if !ok {
 		http.Error(w, "Invalid profile: "+p, http.StatusBadRequest)
 		return
 	}
 
-	res, err := c.CreateChatCompletion(r.Context(), req)
+	c := client.Get(client.Profiles[p])
+	if err := c.S.Acquire(r.Context(), 1); err != nil {
+		http.Error(w, "Error acquiring semaphore: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer c.S.Release(1)
+
+	res, err := base.CreateChatCompletion(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Error creating chat completion: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -60,13 +67,20 @@ func (h *handler) CreateCompletion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, _ := req.Model.AsCreateCompletionRequestModel0()
-	c, ok := h.clients[p]
+	base, ok := h.clients[p]
 	if !ok {
 		http.Error(w, "Invalid profile: "+p, http.StatusBadRequest)
 		return
 	}
 
-	res, err := c.CreateCompletion(r.Context(), req)
+	c := client.Get(client.Profiles[p])
+	if err := c.S.Acquire(r.Context(), 1); err != nil {
+		http.Error(w, "Error acquiring semaphore: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer c.S.Release(1)
+
+	res, err := base.CreateCompletion(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Error creating completion: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -82,13 +96,20 @@ func (h *handler) CreateEmbedding(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p, _ := req.Model.AsCreateEmbeddingRequestModel0()
-	c, ok := h.clients[p]
+	base, ok := h.clients[p]
 	if !ok {
 		http.Error(w, "Invalid profile: "+p, http.StatusBadRequest)
 		return
 	}
 
-	res, err := c.CreateEmbedding(r.Context(), req)
+	c := client.Get(client.Profiles[p])
+	if err := c.S.Acquire(r.Context(), 1); err != nil {
+		http.Error(w, "Error acquiring semaphore: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer c.S.Release(1)
+
+	res, err := base.CreateEmbedding(r.Context(), req)
 	if err != nil {
 		http.Error(w, "Error creating embedding: "+err.Error(), http.StatusInternalServerError)
 		return

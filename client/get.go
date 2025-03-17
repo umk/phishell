@@ -20,7 +20,7 @@ func Get(ref *Ref) *Client {
 		client = &Client{
 			Ref: ref,
 
-			s:       s,
+			S:       s,
 			Samples: newSamples(samplesCount, defaultBytesPerTok),
 		}
 
