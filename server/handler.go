@@ -46,7 +46,7 @@ func (h *handler) CreateChatCompletion(w http.ResponseWriter, r *http.Request) {
 
 	c := client.Get(client.Profiles[p])
 	if err := c.S.Acquire(r.Context(), 1); err != nil {
-		http.Error(w, "Error acquiring semaphore: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error creating chat completion: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer c.S.Release(1)
@@ -75,7 +75,7 @@ func (h *handler) CreateCompletion(w http.ResponseWriter, r *http.Request) {
 
 	c := client.Get(client.Profiles[p])
 	if err := c.S.Acquire(r.Context(), 1); err != nil {
-		http.Error(w, "Error acquiring semaphore: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error creating completion: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer c.S.Release(1)
@@ -104,7 +104,7 @@ func (h *handler) CreateEmbedding(w http.ResponseWriter, r *http.Request) {
 
 	c := client.Get(client.Profiles[p])
 	if err := c.S.Acquire(r.Context(), 1); err != nil {
-		http.Error(w, "Error acquiring semaphore: "+err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Error creating embedding: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer c.S.Release(1)

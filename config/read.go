@@ -91,7 +91,7 @@ func LoadConfigFile(path string, config *ConfigFile) error {
 	return nil
 }
 
-func setServiceFromProfileOrPreset(target *Profile, source *ConfigFileProfile) error {
+func setProfileFromFileProfileOrPreset(target *Profile, source *ConfigFileProfile) error {
 	if source.Preset != nil {
 		preset, ok := presets[*source.Preset]
 		if !ok {
@@ -105,6 +105,10 @@ func setServiceFromProfileOrPreset(target *Profile, source *ConfigFileProfile) e
 
 	if err := setServiceFromProfile(target, source); err != nil {
 		return err
+	}
+
+	if target.BaseURL == "" {
+		target.BaseURL = presetOpenAI.BaseURL
 	}
 
 	return nil

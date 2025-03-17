@@ -1,6 +1,7 @@
 package config
 
 var presetOpenAI = ConfigFileProfile{
+	BaseURL:     "https://api.openai.com/v1/",
 	Concurrency: 5,
 	ContextSize: 256 * 1024,
 }

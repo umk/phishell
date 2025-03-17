@@ -21,6 +21,10 @@ import (
 var version string
 
 func main() {
+	if _, ok := os.LookupEnv("DEBUG"); ok {
+		fmt.Fprintln(os.Stderr, version)
+	}
+
 	ctx := context.Background()
 
 	if err := config.Init(); err != nil {
@@ -43,8 +47,6 @@ func main() {
 		os.Setenv("PHISHELL_PROFILE", client.Default.Config.Profile)
 		defer server.Close(ctx)
 	}
-
-	termx.Logo.Println(version)
 
 	if err := runCli(ctx); err != nil {
 		if !errors.Is(err, io.EOF) && !errorsx.IsCanceled(err) {

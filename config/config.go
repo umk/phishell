@@ -100,7 +100,7 @@ func Init() error {
 			Profile:     id,
 			Concurrency: 1,
 		}
-		if err := setServiceFromProfileOrPreset(profile, p); err != nil {
+		if err := setProfileFromFileProfileOrPreset(profile, p); err != nil {
 			return err
 		}
 
@@ -123,13 +123,13 @@ func checkConfig() error {
 	for i, profile := range Config.Profiles {
 		if err := v.Struct(profile); err != nil {
 			if vals, ok := err.(validator.ValidationErrors); ok && len(vals) > 0 {
-				err = fmt.Errorf("invalid field %q", vals[0].Namespace())
+				err = fmt.Errorf("invalid field %s", vals[0].Namespace())
 			}
 			if slices.Contains(Config.ChatProfiles, profile.Profile) {
 				return fmt.Errorf("validation failed for profile %q: %w", profile.Profile, err)
 			}
 
-			fmt.Fprintf(os.Stderr, "warning: validation failed for profile %q: %v.\n", profile.Profile, err)
+			fmt.Fprintf(os.Stderr, "profile %q ignored: %v\n", profile.Profile, err)
 			offset++
 		} else {
 			Config.Profiles[i-offset] = profile
