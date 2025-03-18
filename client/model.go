@@ -11,6 +11,7 @@ type ModelTier int
 
 const (
 	Tier1 ModelTier = iota + 1
+	Tier2
 )
 
 func (c Client) GetModel(ctx context.Context, tier ModelTier) string {
@@ -21,6 +22,8 @@ func (c Client) GetModel(ctx context.Context, tier ModelTier) string {
 	switch tier {
 	case Tier1:
 		return openai.ChatModelGPT4o
+	case Tier2:
+		return openai.ChatModelGPT4oMini
 	default:
 		panic(fmt.Sprintf("model tier is not supported: %d", tier))
 	}

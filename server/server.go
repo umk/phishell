@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+	"github.com/umk/phishell/server/internal"
 )
 
 var instance *http.Server
@@ -47,12 +49,12 @@ func serve(errOut chan<- error) (string, *http.Server, error) {
 		return "", nil, fmt.Errorf("failed to listen on UDS socket: %w", err)
 	}
 
-	h, err := newHandler()
+	h, err := newProxyHandler()
 	if err != nil {
 		return "", nil, err
 	}
 	server := &http.Server{
-		Handler: Handler(h),
+		Handler: internal.Handler(h),
 	}
 
 	go func() {

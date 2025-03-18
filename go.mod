@@ -9,7 +9,6 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/google/uuid v1.6.0
-	github.com/oapi-codegen/runtime v1.1.1
 	github.com/openai/openai-go v0.1.0-alpha.41
 	github.com/pehringer/simd v1.2.5
 	github.com/sergi/go-diff v1.3.1
@@ -20,7 +19,6 @@ require (
 
 require (
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
-	github.com/apapsch/go-jsonmerge/v2 v2.0.0 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/charmbracelet/lipgloss v0.12.1 // indirect

@@ -129,7 +129,7 @@ func checkConfig() error {
 				return fmt.Errorf("validation failed for profile %q: %w", profile.Profile, err)
 			}
 
-			fmt.Fprintf(os.Stderr, "profile %q ignored: %v\n", profile.Profile, err)
+			fmt.Fprintf(os.Stderr, "Warning: profile %q is ignored: %v\n", profile.Profile, err)
 			offset++
 		} else {
 			Config.Profiles[i-offset] = profile
