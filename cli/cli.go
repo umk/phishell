@@ -14,6 +14,7 @@ import (
 	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/config"
 	"github.com/umk/phishell/util/errorsx"
+	"github.com/umk/phishell/util/termx"
 )
 
 type PromptMode int
@@ -53,6 +54,8 @@ func (c *Cli) Run(ctx context.Context) error {
 	cancelThisContext := cancelOnSigTerm()
 
 	for {
+		termx.MD.Init()
+
 		ctx := cancelThisContext(ctx)
 
 		if err := c.processPrompt(ctx); err != nil {

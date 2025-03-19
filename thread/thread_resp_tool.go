@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/openai/openai-go"
+	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/util/errorsx"
 )
 
@@ -12,7 +13,14 @@ func (t *Thread) processToolMessage(ctx context.Context, response openai.ChatCom
 	r := NewToolRunner(t.host)
 
 	for _, call := range response.ToolCalls {
-		if err := r.Add(&call); err != nil {
+		var functionDescr string
+		if t, ok := t.host.Tool(call.Function.Name); ok {
+			if f, ok := t.Function.Raw.(tool.Function); ok {
+				functionDescr = f.Description
+			}
+		}
+
+		if err := r.Add(&call, functionDescr); err != nil {
 			if errorsx.IsCanceled(err) {
 				return err
 			}

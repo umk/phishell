@@ -7,6 +7,8 @@ import (
 
 	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/server/internal"
+	"github.com/umk/phishell/util/stringsx"
+	"github.com/umk/phishell/util/termx"
 )
 
 type proxyHandler struct {
@@ -56,8 +58,8 @@ func (h *proxyHandler) CreateChatCompletion(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Error creating chat completion: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer res.Body.Close()
+
 	v, ok := parseResponseBody[internal.CreateChatCompletionResponse](w, res)
 	if !ok {
 		return
@@ -65,15 +67,17 @@ func (h *proxyHandler) CreateChatCompletion(w http.ResponseWriter, r *http.Reque
 
 	if len(v.V.Choices) == 1 {
 		c := v.V.Choices[0]
-		if tc := c.V.Message.V.ToolCalls; tc != nil {
-			if len(*tc) > 1 {
+		if tcs := c.V.Message.V.ToolCalls; tcs != nil {
+			if len(*tcs) > 1 {
 				// Can't handle approve and revise loop of multiple calls, so
 				// force the number of calls to one.
-				*tc = (*tc)[:1]
+				*tcs = (*tcs)[:1]
 			}
 
-			if len(*tc) == 1 {
-				// TODO
+			if len(*tcs) == 1 {
+				tc := (*tcs)[0]
+				toks := stringsx.Tokens(tc.V.Function.V.Name)
+				termx.MD.Printf("Running: %s", stringsx.DisplayName(toks))
 			}
 		}
 	}
@@ -105,7 +109,7 @@ func (h *proxyHandler) CreateEmbedding(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Error creating embedding: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	defer res.Body.Close()
+
 	propagateResponse(w, res, res.Body)
 }

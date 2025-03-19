@@ -23,17 +23,18 @@ type ToolRunner struct {
 type ToolRunnerHandler struct {
 	id string
 
-	name    string
-	handler tool.Handler
-	err     error // An error occurred during handler creation
+	function      openai.ChatCompletionMessageToolCallFunction
+	functionDescr string
+	handler       tool.Handler
+	err           error // An error occurred during handler creation
 }
 
 func NewToolRunner(host *host.Host) *ToolRunner {
 	return &ToolRunner{host: host}
 }
 
-func (c *ToolRunner) Add(toolCall *openai.ChatCompletionMessageToolCall) error {
-	h := c.getToolHandler(toolCall)
+func (c *ToolRunner) Add(toolCall *openai.ChatCompletionMessageToolCall, functionDescr string) error {
+	h := c.getToolHandler(toolCall, functionDescr)
 
 	c.handlers = append(c.handlers, h)
 
@@ -92,21 +93,27 @@ func (c *ToolRunner) callTool(ctx context.Context, h *ToolRunnerHandler) (string
 	return content, nil
 }
 
-func (c *ToolRunner) getToolHandler(toolCall *openai.ChatCompletionMessageToolCall) *ToolRunnerHandler {
+func (c *ToolRunner) getToolHandler(
+	toolCall *openai.ChatCompletionMessageToolCall, functionDescr string,
+) *ToolRunnerHandler {
 	id := toolCall.ID
-	name := toolCall.Function.Name
 
-	h, err := c.host.Get(&toolCall.Function)
+	h, err := c.host.Handler(&toolCall.Function)
 	if err != nil {
-		return &ToolRunnerHandler{id: id, name: name, err: err}
+		return &ToolRunnerHandler{id: id, function: toolCall.Function, err: err}
 	}
 
 	if h == nil {
 		err := fmt.Errorf("function doesn't exist: %s", toolCall.Function.Name)
-		return &ToolRunnerHandler{id: id, name: name, err: err}
+		return &ToolRunnerHandler{id: id, function: toolCall.Function, err: err}
 	}
 
-	return &ToolRunnerHandler{id: id, name: name, handler: h}
+	return &ToolRunnerHandler{
+		id:            id,
+		function:      toolCall.Function,
+		functionDescr: functionDescr,
+		handler:       h,
+	}
 }
 
 func (c *ToolRunner) processError(err error) string {
@@ -114,19 +121,16 @@ func (c *ToolRunner) processError(err error) string {
 }
 
 func confirmToolCall(ctx context.Context, h *ToolRunnerHandler) error {
-	t := stringsx.Tokens(h.name)
+	t := stringsx.Tokens(h.function.Name)
 
 	if len(t) == 0 {
 		return nil
 	}
 
-	descr, _ := tool.Describe(ctx, h.handler)
-
-	if descr != "" {
-		termx.NewPrinter().Println(descr)
+	if descr, _ := tool.Describe(ctx, h.handler); descr != "" {
+		termx.MD.Println(descr)
 	} else {
-		dn := strings.ToLower(stringsx.DisplayName(t))
-		termx.NewPrinter().Printf("Running %s\n", dn)
+		termx.MD.Println(tool.DescribeCall(h.function.Name, h.function.Arguments, h.functionDescr))
 	}
 
 	for {

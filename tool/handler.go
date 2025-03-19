@@ -1,6 +1,8 @@
 package tool
 
-import "context"
+import (
+	"context"
+)
 
 // Handler defines an interface for executing tools.
 type Handler interface {

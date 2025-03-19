@@ -17,11 +17,13 @@ export type FunctionParameterSchema = {
   schema: JsonSchema & JsonSchemaObject
 }
 
+export type FunctionHandler = (...params: Array<unknown>) => unknown
+
 export type FunctionInfo = {
   name: string
   f: PackageFunction & PackageFunctionSignature
   parameter: FunctionParameterSchema
-  handler: (...params: Array<unknown>) => unknown
+  handler: FunctionHandler
 }
 
 class FunctionError extends Error {
@@ -105,6 +107,7 @@ async function getFunctions(
   } catch (error) {
     throw new Error(`Cannot process package type definitions: ${error}`)
   }
+
   return functions
 }
 

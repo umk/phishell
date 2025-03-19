@@ -12,7 +12,6 @@ import (
 	"github.com/umk/phishell/prompt/msg"
 	"github.com/umk/phishell/tool/host"
 	"github.com/umk/phishell/util/errorsx"
-	"github.com/umk/phishell/util/termx"
 )
 
 type Thread struct {
@@ -23,8 +22,6 @@ type Thread struct {
 	host   *host.Host
 
 	tools []openai.ChatCompletionToolParam
-
-	printer *termx.Printer
 }
 
 func NewThread(history *History, ref *client.Ref, host *host.Host) (*Thread, error) {
@@ -46,8 +43,6 @@ func NewThread(history *History, ref *client.Ref, host *host.Host) (*Thread, err
 		// Save for consistency across the rounds of LLM calls even if some of
 		// the tools become unavailable.
 		tools: tools,
-
-		printer: termx.NewPrinter(),
 	}, nil
 }
 

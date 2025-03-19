@@ -10,42 +10,46 @@ import (
 	"golang.org/x/term"
 )
 
+var MD MDPrinter
+
 func init() {
-	configs := []*ansi.StyleConfig{&styles.LightStyleConfig, &styles.DarkStyleConfig}
-	for _, c := range configs {
+	for _, c := range []*ansi.StyleConfig{
+		&styles.LightStyleConfig,
+		&styles.DarkStyleConfig,
+	} {
 		c.Item.BlockPrefix = " - "
 	}
+
+	MD.Init()
 }
 
-type Printer struct {
-	base *glamour.TermRenderer
+type MDPrinter struct {
+	renderer *glamour.TermRenderer
 }
 
-func NewPrinter() *Printer {
+func (p *MDPrinter) Init() {
 	width, _, err := term.GetSize(int(os.Stdin.Fd()))
 	if err != nil {
 		width = 80
 	}
 
-	base, _ := glamour.NewTermRenderer(
+	MD.renderer, _ = glamour.NewTermRenderer(
 		glamour.WithAutoStyle(),
 		glamour.WithWordWrap(width-4),
 	)
-
-	return &Printer{base: base}
 }
 
-func (p *Printer) Println(a ...any) {
+func (p *MDPrinter) Println(a ...any) {
 	p.Print(fmt.Sprintln(a...))
 }
 
-func (p *Printer) Printf(format string, a ...any) {
+func (p *MDPrinter) Printf(format string, a ...any) {
 	p.Print(fmt.Sprintf(format, a...))
 }
 
-func (p *Printer) Print(s string) {
-	if p.base != nil {
-		f, err := p.base.Render(s)
+func (p *MDPrinter) Print(s string) {
+	if p.renderer != nil {
+		f, err := p.renderer.Render(s)
 		if err == nil {
 			fmt.Print(f)
 			return

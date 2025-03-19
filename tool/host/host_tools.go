@@ -31,7 +31,32 @@ func (h *Host) Tools() ([]openai.ChatCompletionToolParam, error) {
 	return r, nil
 }
 
-func (h *Host) Get(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handler, error) {
+func (h *Host) Tool(name string) (openai.ChatCompletionToolParam, bool) {
+	tools, err := h.getProviderTools()
+	if err != nil {
+		return openai.ChatCompletionToolParam{}, false
+	}
+
+	// Built-in commands
+	switch name {
+	case builtin.FsCreateOrUpdateToolName:
+		return builtin.FsCreateOrUpdateTool, true
+	case builtin.FsReadToolName:
+		return builtin.FsReadTool, true
+	case builtin.FsDeleteToolName:
+		return builtin.FsDeleteTool, true
+	case builtin.ExecCommandToolName:
+		return builtin.ExecCommandTool, true
+	}
+
+	if p, ok := tools[name]; ok {
+		return p.param, true
+	} else {
+		return openai.ChatCompletionToolParam{}, false
+	}
+}
+
+func (h *Host) Handler(f *openai.ChatCompletionMessageToolCallFunction) (tool.Handler, error) {
 	tools, err := h.getProviderTools()
 	if err != nil {
 		return nil, err
