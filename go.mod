@@ -12,8 +12,8 @@ require (
 	github.com/openai/openai-go v0.1.0-alpha.41
 	github.com/pehringer/simd v1.2.5
 	github.com/sergi/go-diff v1.3.1
-	golang.org/x/sync v0.10.0
-	golang.org/x/term v0.27.0
+	golang.org/x/sync v0.11.0
+	golang.org/x/term v0.29.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -44,8 +44,8 @@ require (
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/yuin/goldmark v1.7.4 // indirect
 	github.com/yuin/goldmark-emoji v1.0.3 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 )
