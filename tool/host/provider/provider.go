@@ -12,7 +12,6 @@ import (
 
 	"github.com/umk/phishell/tool/host/process"
 	"github.com/umk/phishell/tool/host/provider/schema"
-	"github.com/umk/phishell/util/execx"
 )
 
 const RestartExitCode = 99
@@ -25,7 +24,7 @@ type Provider struct {
 	terminated atomic.Bool
 
 	// A prototype of the process' command.
-	Cmd *execx.Cmd
+	Cmd *exec.Cmd
 
 	Process *process.Process
 
@@ -66,14 +65,14 @@ func (s Status) String() string {
 	return ""
 }
 
-func Start(c *execx.Cmd) (*Provider, error) {
-	pr, err := process.Start(c)
+func Start(cmd *exec.Cmd) (*Provider, error) {
+	pr, err := process.Start(cmd)
 	if err != nil {
 		return nil, err
 	}
 
 	p := &Provider{
-		Cmd:     c,
+		Cmd:     cmd,
 		Process: pr,
 
 		Info: &Info{

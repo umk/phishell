@@ -2,11 +2,7 @@ package marshalx
 
 import (
 	"encoding/json"
-
-	"github.com/go-playground/validator/v10"
 )
-
-var unmarshalJSONVal = validator.New(validator.WithRequiredStructEnabled())
 
 // UnmarshalJSONStruct takes a byte array containing JSON string and
 // unmarshals it into the provided value pointer and validates
@@ -16,7 +12,7 @@ func UnmarshalJSONStruct[A any](data []byte, out *A) error {
 		return err
 	}
 
-	if err := unmarshalJSONVal.Struct(out); err != nil {
+	if err := Validator.Struct(out); err != nil {
 		return err
 	}
 

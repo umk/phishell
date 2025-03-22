@@ -10,8 +10,7 @@ import (
 const compactToSumRatio = 3
 
 func mustSummarizeResp(cr *client.Ref, resp string) bool {
-	cl := client.Get(cr)
-	toks := float32(len(resp)) / cl.Samples.BytesPerTok()
+	toks := float32(len(resp)) / cr.Samples.BytesPerTok()
 
 	return toks > float32(cr.Config.ContextSize)/compactToSumRatio
 }

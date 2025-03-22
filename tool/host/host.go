@@ -2,11 +2,11 @@ package host
 
 import (
 	"errors"
+	"os/exec"
 	"sync"
 
 	"github.com/openai/openai-go"
 	"github.com/umk/phishell/tool/host/provider"
-	"github.com/umk/phishell/util/execx"
 )
 
 type Host struct {
@@ -34,7 +34,7 @@ func NewHost() *Host {
 	return &Host{tools: make(map[string]*providerTool)}
 }
 
-func (h *Host) Execute(c *execx.Cmd) (*provider.Provider, error) {
+func (h *Host) Execute(cmd *exec.Cmd) (*provider.Provider, error) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
@@ -42,7 +42,7 @@ func (h *Host) Execute(c *execx.Cmd) (*provider.Provider, error) {
 		return nil, errors.New("host is terminated")
 	}
 
-	p, err := provider.Start(c)
+	p, err := provider.Start(cmd)
 	if err != nil {
 		return nil, err
 	}

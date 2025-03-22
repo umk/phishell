@@ -1,5 +1,7 @@
 # 𝛗 shell
 
+[![ChatGPT Phi_Shell_Assistant](https://img.shields.io/badge/ChatGPT-Phi_Shell_Assistant-blue)](https://chatgpt.com/g/g-677b547fe234819183b109e2bd5a5598-phi-shell-assistant)
+
 **Phi Shell** is a command-line application designed to serve as a command processor with enhanced capabilities for integrating external tool providers and interacting with Large Language Models (LLMs). These tool providers are standalone programs created by users. Providers can be implemented in any programming language, taking advantage of thousands of libraries to enable features ranging from integrations with external systems to the implementation of sophisticated business logic. The host program communicates with tool providers through their `Stdin` and `Stdout`, reducing the need for extensive boilerplate code.
 
 Phi Shell offers two distinct modes of operation:
@@ -8,6 +10,9 @@ Phi Shell offers two distinct modes of operation:
 - **Chat**: Interacts with LLMs directly to perform inference and leverages attached tools for enhanced functionality during LLM interactions.
 
 The modes can be switched between using the <kbd>Tab</kbd> key.
+
+> [!TIP]
+> Explore [custom GPT](https://chatgpt.com/g/g-677b547fe234819183b109e2bd5a5598-phi-shell-assistant) to get personalized guidance on configuring Phi Shell and building tools.
 
 ## Configuration
 

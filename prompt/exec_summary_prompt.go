@@ -18,8 +18,6 @@ type ExecSummaryPromptParams struct {
 }
 
 func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (*Completion, error) {
-	cl := client.Get(params.Client)
-
 	output, tail, err := params.Output.Get()
 	if err != nil {
 		return nil, err
@@ -41,9 +39,9 @@ func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (*C
 		openai.UserMessage(message),
 	}
 
-	c, err := cl.Completion(ctx, openai.ChatCompletionNewParams{
+	c, err := params.Client.Completion(ctx, openai.ChatCompletionNewParams{
 		Messages: openai.F(messages),
-		Model:    openai.F(cl.GetModel(ctx, client.Tier1)),
+		Model:    openai.F(params.Client.Model(client.Tier1)),
 		TopP:     openai.F(0.25),
 	})
 	if err != nil {

@@ -31,7 +31,7 @@ func (c *AttachCommand) Execute(ctx context.Context, args execx.Arguments) error
 		cmd = createAttachGeneric(args)
 	}
 
-	p, err := c.context.session.Host.Execute(&cmd)
+	p, err := c.context.session.Host.Execute(cmd.Command())
 	if err != nil {
 		return err
 	}

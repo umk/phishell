@@ -14,11 +14,9 @@ type UserPromptParams struct {
 }
 
 func PromptUser(ctx context.Context, params *UserPromptParams) (*Completion, error) {
-	cl := client.Get(params.Client)
-
-	c, err := cl.Completion(ctx, openai.ChatCompletionNewParams{
+	c, err := params.Client.Completion(ctx, openai.ChatCompletionNewParams{
 		Messages: openai.F(params.Messages),
-		Model:    openai.F(cl.GetModel(ctx, client.Tier1)),
+		Model:    openai.F(params.Client.Model(client.Tier1)),
 		Tools:    openai.F(params.Tools),
 		TopP:     openai.F(0.25),
 	})

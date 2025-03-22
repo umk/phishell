@@ -46,7 +46,7 @@ func (h *proxyHandler) CreateChatCompletion(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	c := client.Get(client.Profiles[req.V.Model])
+	c := client.Profiles[req.V.Model]
 	if err := c.S.Acquire(r.Context(), 1); err != nil {
 		http.Error(w, "Error creating chat completion: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -97,7 +97,7 @@ func (h *proxyHandler) CreateEmbedding(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := client.Get(client.Profiles[req.V.Model])
+	c := client.Profiles[req.V.Model]
 	if err := c.S.Acquire(r.Context(), 1); err != nil {
 		http.Error(w, "Error creating embedding: "+err.Error(), http.StatusInternalServerError)
 		return

@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/openai/openai-go"
@@ -14,9 +13,9 @@ const (
 	Tier2
 )
 
-func (c Client) GetModel(ctx context.Context, tier ModelTier) string {
-	if c.Config.Model != "" {
-		return c.Config.Model
+func (ref *Ref) Model(tier ModelTier) string {
+	if ref.Config.Model != "" {
+		return ref.Config.Model
 	}
 
 	switch tier {

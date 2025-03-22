@@ -5,6 +5,8 @@ import (
 	"path"
 	"strings"
 
+	"slices"
+
 	"github.com/bmatcuk/doublestar/v4"
 )
 
@@ -18,10 +20,8 @@ func GlobsWalk(basePath string, includes, excludes []string, fn doublestar.GlobW
 			p = path.Clean(p)
 			for _, exc := range excludes {
 				seg := strings.Split(p, string(os.PathSeparator))
-				for _, segment := range seg {
-					if segment == exc {
-						return nil
-					}
+				if slices.Contains(seg, exc) {
+					return nil
 				}
 				ok, err := doublestar.Match(exc, p)
 				if err != nil {
