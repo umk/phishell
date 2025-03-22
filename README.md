@@ -146,6 +146,11 @@ The Basic Shell mode supports the following built-in commands:
             </td>
         </tr>
         <tr valign="top">
+            <td><code>attach js [path]</code></td>
+            <td>Attach Node.js package that implements tools.
+            </td>
+        </tr>
+        <tr valign="top">
             <td><code>cd [dir]</code></td>
             <td>Change the current directory</td>
         </tr>
@@ -198,6 +203,12 @@ To establish communication between the Phi Shell and the provider, the provider 
 3. **Processing Tool Calls**: The provider must read input from `Stdin`, one line at a time, where each line represents a tool call. Once the tool call is processed, the provider must print the response to `Stdout`, with each response appearing on a separate line and preserving the call ID to ensure matching of requests and responses.
 
 Tool calls may be processed concurrently, and responses can be returned out of order. The Phi Shell applies timeouts while waiting for responses from the provider.
+
+### TypeScript Support
+
+Phi Shell enables the development of tool providers as Node.js packages. Functions should be exported from the package's `index.js` file and include type definitions specified in the `types` field of the `package.json`. The host application automatically extracts function schemas from these type definitions for seamless integration with LLM calls. When a tool is called, the tool is executed using the current working directory of the user.
+
+To run a TypeScript package as a tools provider, use the command `attach js [path]`. If a path is not provided, the host will try to find the package in the current directory.
 
 ### Schemas
 
