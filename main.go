@@ -23,6 +23,8 @@ var version string
 func main() {
 	if _, ok := os.LookupEnv("DEBUG"); ok {
 		fmt.Fprintln(os.Stderr, version)
+	} else {
+		log.SetOutput(io.Discard)
 	}
 
 	ctx := context.Background()
@@ -42,7 +44,7 @@ func main() {
 	}
 
 	if err := server.Init(); err != nil {
-		fmt.Fprintf(os.Stderr, "warning: failed to set up server: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Warning: failed to set up server: %v\n", err)
 	} else {
 		os.Setenv("PHISHELL_PROFILE", client.Default.Config.Profile)
 		defer server.Close(ctx)
@@ -58,8 +60,6 @@ func main() {
 
 func runCli(ctx context.Context) error {
 	c := cli.NewCli()
-
-	log.SetOutput(io.Discard)
 
 	if err := c.Init(ctx); err != nil {
 		return err
