@@ -24,11 +24,19 @@ func (h *SliceHeap[T]) Pop() any {
 	return x
 }
 
-func PushOrReplace[T SliceHeapItem[T]](h *SliceHeap[T], item T) {
+type LimitHeap[T SliceHeapItem[T]] SliceHeap[T]
+
+func MakeLimitHeap[T SliceHeapItem[T]](n int) LimitHeap[T] {
+	h := make(LimitHeap[T], 0, n)
+	heap.Init((*SliceHeap[T])(&h))
+	return h
+}
+
+func (h *LimitHeap[T]) Push(item T) {
 	if len(*h) < cap(*h) {
-		heap.Push(h, item)
+		heap.Push((*SliceHeap[T])(h), item)
 	} else {
 		(*h)[0] = item
-		heap.Fix(h, 0)
+		heap.Fix((*SliceHeap[T])(h), 0)
 	}
 }

@@ -4,7 +4,7 @@ import "github.com/umk/phishell/util/slicesx"
 
 // maxDistanceHeap implements a heap interface that compares vector
 // records by the order of decreasing their similarity to another vector.
-type maxDistanceHeap = slicesx.SliceHeap[*maxDistanceHeapItem]
+type maxDistanceHeap = slicesx.LimitHeap[*maxDistanceHeapItem]
 
 type maxDistanceHeapItem struct {
 	record     *record

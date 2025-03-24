@@ -108,10 +108,6 @@ The following command line arguments are supported when running Phi Shell:
     </thead>
     <tbody>
         <tr valign="top">
-            <td><code>-debug</code></td>
-            <td>Run program in debug mode to display additional information about interaction with LLM server.</td>
-        </tr>
-        <tr valign="top">
             <td><code>-dir [dir]</code></td>
             <td>Base directory. Defaults to current directory.</td>
         </tr>
@@ -120,10 +116,6 @@ The following command line arguments are supported when running Phi Shell:
             <td>Specify LLM profile to use for chat mode. If not specified, the default profile is used. There can be
                 multiple profiles specified, and all of them will have their distinct mode, which can be cycled through
                 using the <kbd>Tab</kbd> key. All the profiles will operate over the same chat history, but only the first profile will be used for LLM interactions behind the scenes (for example, the chat history compaction).</td>
-        </tr>
-        <tr valign="top">
-            <td><code>-v</code></td>
-            <td>Show version and quit.</td>
         </tr>
     </tbody>
 </table>

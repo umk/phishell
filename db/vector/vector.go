@@ -1,7 +1,6 @@
 package vector
 
 import (
-	"container/heap"
 	"slices"
 	"sync"
 
@@ -108,14 +107,12 @@ func (v *Vectors) getHeaps(vectors []Vector, n int) <-chan maxDistanceHeap {
 func (v *Vectors) getByChunk(
 	chunk *vectorsChunk, vector Vector, n int, norm float64,
 ) maxDistanceHeap {
-	dh := make(maxDistanceHeap, 0, n)
-
-	heap.Init(&dh)
+	dh := slicesx.MakeLimitHeap[*maxDistanceHeapItem](n)
 
 	tmp := vectorsPool.Get(len(vector))
 
 	count := len(chunk.records)
-	for i := 0; i < count; i++ {
+	for i := range count {
 		r := chunk.records[i]
 
 		if r == nil {
@@ -123,7 +120,7 @@ func (v *Vectors) getByChunk(
 		}
 
 		s := cosineSimilarity(vector, r.vector, norm, r.norm, *tmp)
-		slicesx.PushOrReplace(&dh, &maxDistanceHeapItem{record: r, similarity: s})
+		dh.Push(&maxDistanceHeapItem{record: r, similarity: s})
 	}
 
 	vectorsPool.Put(tmp)
@@ -140,7 +137,7 @@ func reduceHeaps(in <-chan maxDistanceHeap, n int) maxDistanceHeap {
 		h := make(maxDistanceHeap, 0, n)
 		for cur := range in {
 			for _, r := range cur {
-				slicesx.PushOrReplace(&h, r)
+				h.Push(r)
 			}
 		}
 
