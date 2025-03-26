@@ -6,7 +6,10 @@ import (
 )
 
 func (t *Thread) processChatMessage(response openai.ChatCompletionMessage) error {
-	t.frame.Messages = append(t.frame.Messages, response)
+	message := response.ToAssistantMessageParam()
+	t.frame.Messages = append(t.frame.Messages, openai.ChatCompletionMessageParamUnion{
+		OfAssistant: &message,
+	})
 	t.frame.Response = response.Content
 
 	termx.MD.Print(response.Content)

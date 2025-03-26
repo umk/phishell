@@ -22,8 +22,8 @@ var fsReadFunction = tool.MustUnmarshalFn(fsReadFunctionBytes)
 var FsReadToolName = fsReadFunction.Name
 
 var FsReadTool = openai.ChatCompletionToolParam{
-	Type:     openai.F(openai.ChatCompletionToolTypeFunction),
-	Function: openai.Raw[openai.FunctionDefinitionParam](fsReadFunction),
+	Type:     "function",
+	Function: fsReadFunction.ToFunctionDefinitionParam(),
 }
 
 type FsReadArguments struct {

@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/openai/openai-go"
-	"github.com/umk/phishell/tool"
 	"github.com/umk/phishell/util/errorsx"
 )
 
@@ -15,8 +14,8 @@ func (t *Thread) processToolMessage(ctx context.Context, response openai.ChatCom
 	for _, call := range response.ToolCalls {
 		var functionDescr string
 		if t, ok := t.host.Tool(call.Function.Name); ok {
-			if f, ok := t.Function.Raw.(tool.Function); ok {
-				functionDescr = f.Description
+			if t.Function.Description.IsPresent() {
+				functionDescr = t.Function.Description.Value
 			}
 		}
 
@@ -36,7 +35,10 @@ func (t *Thread) processToolMessage(ctx context.Context, response openai.ChatCom
 		return err
 	}
 
-	t.frame.Messages = append(t.frame.Messages, response)
+	message := response.ToAssistantMessageParam()
+	t.frame.Messages = append(t.frame.Messages, openai.ChatCompletionMessageParamUnion{
+		OfAssistant: &message,
+	})
 	t.frame.Messages = append(t.frame.Messages, messages...)
 
 	return nil

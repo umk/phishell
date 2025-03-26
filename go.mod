@@ -9,7 +9,7 @@ require (
 	github.com/fatih/color v1.18.0
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/google/uuid v1.6.0
-	github.com/openai/openai-go v0.1.0-alpha.41
+	github.com/openai/openai-go v0.1.0-beta.2
 	github.com/pehringer/simd v1.2.5
 	github.com/sergi/go-diff v1.3.1
 	golang.org/x/sync v0.11.0

@@ -27,8 +27,8 @@ var fsCreateOrUpdateFunction = tool.MustUnmarshalFn(fsCreateOrUpdateFunctionByte
 var FsCreateOrUpdateToolName = fsCreateOrUpdateFunction.Name
 
 var FsCreateOrUpdateTool = openai.ChatCompletionToolParam{
-	Type:     openai.F(openai.ChatCompletionToolTypeFunction),
-	Function: openai.Raw[openai.FunctionDefinitionParam](fsCreateOrUpdateFunction),
+	Type:     "function",
+	Function: fsCreateOrUpdateFunction.ToFunctionDefinitionParam(),
 }
 
 type FsCreateOrUpdateArguments struct {

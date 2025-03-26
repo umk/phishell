@@ -30,7 +30,7 @@ func (ref *Ref) Completion(ctx context.Context, params openai.ChatCompletionNewP
 	if c != nil {
 		ref.setSamplesFromCompl(c)
 
-		messages := len(params.Messages.Value)
+		messages := len(params.Messages)
 		promptToks := c.Usage.PromptTokens
 		complToks := c.Usage.CompletionTokens
 		totalToks := c.Usage.TotalTokens
@@ -109,8 +109,8 @@ func (ref *Ref) setSamplesFromEmbedding(params *openai.EmbeddingNewParams, e *op
 
 	var b int
 
-	if arr, ok := params.Input.Value.(openai.EmbeddingNewParamsInputArrayOfStrings); ok {
-		for _, s := range arr {
+	if params.Input.OfArrayOfStrings != nil {
+		for _, s := range params.Input.OfArrayOfStrings {
 			b += len(s)
 		}
 	}

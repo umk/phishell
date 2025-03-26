@@ -25,8 +25,8 @@ var execCommandFunction = tool.MustUnmarshalFn(execCommandFunctionBytes)
 var ExecCommandToolName = execCommandFunction.Name
 
 var ExecCommandTool = openai.ChatCompletionToolParam{
-	Type:     openai.F(openai.ChatCompletionToolTypeFunction),
-	Function: openai.Raw[openai.FunctionDefinitionParam](execCommandFunction),
+	Type:     "function",
+	Function: execCommandFunction.ToFunctionDefinitionParam(),
 }
 
 type ExecCommandArguments struct {

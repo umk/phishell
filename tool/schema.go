@@ -1,10 +1,23 @@
 package tool
 
+import (
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/packages/param"
+	"github.com/openai/openai-go/shared/constant"
+)
+
 type Tool struct {
 	// The type of the tool. Currently, only `function` is supported.
 	Type string `json:"type" validate:"required,oneof=function"`
 	// Description of the function.
 	Function *Function `json:"function,omitempty"`
+}
+
+func (t *Tool) ToChatCompletionToolParam() openai.ChatCompletionToolParam {
+	return openai.ChatCompletionToolParam{
+		Type:     constant.Function(t.Type),
+		Function: t.Function.ToFunctionDefinitionParam(),
+	}
 }
 
 type Function struct {
@@ -16,4 +29,17 @@ type Function struct {
 	Description string `json:"description,omitempty"`
 	// The parameters the functions accepts, described as a JSON Schema object.
 	Parameters map[string]any `json:"parameters" validate:"required"`
+}
+
+func (f *Function) ToFunctionDefinitionParam() openai.FunctionDefinitionParam {
+	r := openai.FunctionDefinitionParam{
+		Name:       f.Name,
+		Parameters: f.Parameters,
+	}
+
+	if f.Description != "" {
+		r.Description = param.NewOpt(f.Description)
+	}
+
+	return r
 }

@@ -22,8 +22,8 @@ var fsDeleteFunction = tool.MustUnmarshalFn(fsDeleteFunctionBytes)
 var FsDeleteToolName = fsDeleteFunction.Name
 
 var FsDeleteTool = openai.ChatCompletionToolParam{
-	Type:     openai.F(openai.ChatCompletionToolTypeFunction),
-	Function: openai.Raw[openai.FunctionDefinitionParam](fsDeleteFunction),
+	Type:     "function",
+	Function: fsDeleteFunction.ToFunctionDefinitionParam(),
 }
 
 type FsDeleteArguments struct {

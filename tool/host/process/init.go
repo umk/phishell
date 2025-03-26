@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/openai/openai-go"
 	"github.com/umk/phishell/tool"
 )
 
@@ -58,12 +57,7 @@ func (p *Process) readHeaderLine(b []byte) error {
 		return err
 	}
 
-	function := tool.Function
-
-	p.tools[function.Name] = openai.ChatCompletionToolParam{
-		Type:     openai.F(openai.ChatCompletionToolTypeFunction),
-		Function: openai.Raw[openai.FunctionDefinitionParam](function),
-	}
+	p.tools[tool.Function.Name] = tool.ToChatCompletionToolParam()
 
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	_ "embed"
 
 	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/packages/param"
 	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/prompt/msg"
 	"github.com/umk/phishell/util/execx"
@@ -40,9 +41,9 @@ func PromptExecSummary(ctx context.Context, params *ExecSummaryPromptParams) (*C
 	}
 
 	c, err := params.Client.Completion(ctx, openai.ChatCompletionNewParams{
-		Messages: openai.F(messages),
-		Model:    openai.F(params.Client.Model(client.Tier1)),
-		TopP:     openai.F(0.25),
+		Messages: messages,
+		Model:    params.Client.Model(client.Tier1),
+		TopP:     param.NewOpt(0.25),
 	})
 	if err != nil {
 		return nil, err

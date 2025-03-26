@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/packages/param"
 	"github.com/umk/phishell/client"
 )
 
@@ -15,10 +16,10 @@ type UserPromptParams struct {
 
 func PromptUser(ctx context.Context, params *UserPromptParams) (*Completion, error) {
 	c, err := params.Client.Completion(ctx, openai.ChatCompletionNewParams{
-		Messages: openai.F(params.Messages),
-		Model:    openai.F(params.Client.Model(client.Tier1)),
-		Tools:    openai.F(params.Tools),
-		TopP:     openai.F(0.25),
+		Messages: params.Messages,
+		Model:    params.Client.Model(client.Tier1),
+		Tools:    params.Tools,
+		TopP:     param.NewOpt(0.25),
 	})
 	if err != nil {
 		return nil, err

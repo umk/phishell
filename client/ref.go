@@ -9,7 +9,7 @@ import (
 
 type Ref struct {
 	Config  *config.Profile
-	Client  *openai.Client
+	Client  openai.Client
 	S       *semaphore.Weighted
 	Samples *Samples
 }
@@ -23,7 +23,7 @@ func NewRef(p *config.Profile) *Ref {
 	}
 }
 
-func getClient(config *config.Profile) *openai.Client {
+func getClient(config *config.Profile) openai.Client {
 	var opts []option.RequestOption
 
 	if config.BaseURL != "" {
