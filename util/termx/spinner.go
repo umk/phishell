@@ -12,31 +12,51 @@ var Spinner = spinnerCore{
 }
 
 type spinnerCore struct {
-	spinnerMu    sync.Mutex
-	spinner      *spinner.Spinner
-	spinnerCount int
+	spinnerMu sync.Mutex
+	spinner   *spinner.Spinner
+
+	spinnerCount     int
+	suppressionCount int
 }
 
 func (s *spinnerCore) Start() {
-	s.change(1)
-}
-
-func (s *spinnerCore) Stop() {
-	s.change(-1)
-}
-
-func (s *spinnerCore) change(d int) {
 	s.spinnerMu.Lock()
 	defer s.spinnerMu.Unlock()
 
-	s.spinnerCount += d
+	s.spinnerCount++
+	s.updateSpinner()
+}
 
-	switch {
-	case s.spinnerCount == 0:
-		s.spinner.Stop()
-	case s.spinnerCount > 0:
+func (s *spinnerCore) Stop() {
+	s.spinnerMu.Lock()
+	defer s.spinnerMu.Unlock()
+
+	s.spinnerCount--
+	s.updateSpinner()
+}
+
+func (s *spinnerCore) Suppress() {
+	s.spinnerMu.Lock()
+	defer s.spinnerMu.Unlock()
+
+	s.suppressionCount++
+	s.updateSpinner()
+}
+
+func (s *spinnerCore) Unsuppress() {
+	s.spinnerMu.Lock()
+	defer s.spinnerMu.Unlock()
+
+	s.suppressionCount--
+	s.updateSpinner()
+}
+
+func (s *spinnerCore) updateSpinner() {
+	if s.spinnerCount < 0 || s.suppressionCount < 0 {
+		panic("spinner or suppression count is out of range")
+	} else if s.spinnerCount > 0 && s.suppressionCount == 0 {
 		s.spinner.Start()
-	case s.spinnerCount < 0:
-		panic("spinner count is out of range")
+	} else {
+		s.spinner.Stop()
 	}
 }
