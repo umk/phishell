@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/packages/param"
 	"github.com/umk/phishell/client"
 )
 
@@ -19,7 +18,7 @@ func PromptUser(ctx context.Context, params *UserPromptParams) (*Completion, err
 		Messages: params.Messages,
 		Model:    params.Client.Model(client.Tier1),
 		Tools:    params.Tools,
-		TopP:     param.NewOpt(0.25),
+		TopP:     openai.Float(0.25),
 	})
 	if err != nil {
 		return nil, err

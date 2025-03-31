@@ -88,7 +88,7 @@ func (v *Vectors) getHeaps(vectors []Vector, n int) <-chan maxDistanceHeap {
 			norm := vectorNorm(vector, *tmp)
 			vectorsPool.Put(tmp)
 
-			for i := 0; i < len(v.chunks); i++ {
+			for i := range v.chunks {
 				wg.Add(1)
 				go func(chunk *vectorsChunk) {
 					defer wg.Done()

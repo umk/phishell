@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/packages/param"
 	"github.com/umk/phishell/client"
 	"github.com/umk/phishell/prompt/msg"
 )
@@ -29,7 +28,7 @@ func PromptSummary(ctx context.Context, params *SummaryPromptParams) (*Completio
 	c, err := client.Default.Completion(ctx, openai.ChatCompletionNewParams{
 		Messages: messages,
 		Model:    client.Default.Model(client.Tier1),
-		TopP:     param.NewOpt(0.25),
+		TopP:     openai.Float(0.25),
 	})
 	if err != nil {
 		return nil, err

@@ -2,7 +2,6 @@ package tool
 
 import (
 	"github.com/openai/openai-go"
-	"github.com/openai/openai-go/packages/param"
 	"github.com/openai/openai-go/shared/constant"
 )
 
@@ -38,7 +37,7 @@ func (f *Function) ToFunctionDefinitionParam() openai.FunctionDefinitionParam {
 	}
 
 	if f.Description != "" {
-		r.Description = param.NewOpt(f.Description)
+		r.Description = openai.String(f.Description)
 	}
 
 	return r

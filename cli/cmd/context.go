@@ -9,7 +9,8 @@ type Context struct {
 
 	commands map[string]Command
 
-	providers providers
+	providers providersContext
+	documents documentsContext
 }
 
 func NewContext(session *session.Session) *Context {
@@ -17,6 +18,8 @@ func NewContext(session *session.Session) *Context {
 		session: session,
 
 		commands: make(map[string]Command),
+
+		documents: make(documentsContext),
 	}
 
 	context.commands["attach"] = &AttachCommand{context: context}
