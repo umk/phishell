@@ -32,7 +32,7 @@ type Profile struct {
 	Concurrency int `validate:"required,min=1"`
 	ContextSize int `validate:"required,min=2000"`
 
-	Indexing ProfileIndexing `validate:"dive"`
+	Indexing ProfileIndexing
 }
 
 type ProfileIndexing struct {

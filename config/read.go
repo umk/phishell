@@ -30,7 +30,7 @@ type ConfigFileProfile struct {
 	Concurrency int `yaml:"concurrency" validate:"omitempty,min=1"`
 	ContextSize int `yaml:"context" validate:"omitempty,min=2000"`
 
-	Indexing ConfigFileIndexing `yaml:"indexing" validate:"dive"`
+	Indexing ConfigFileIndexing `yaml:"indexing"`
 }
 
 type ConfigFileIndexing struct {
