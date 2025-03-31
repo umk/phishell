@@ -29,6 +29,13 @@ type ConfigFileProfile struct {
 
 	Concurrency int `yaml:"concurrency" validate:"omitempty,min=1"`
 	ContextSize int `yaml:"context" validate:"omitempty,min=2000"`
+
+	Indexing ConfigFileIndexing `yaml:"indexing" validate:"dive"`
+}
+
+type ConfigFileIndexing struct {
+	ChunkToks   int `yaml:"chunkToks" validate:"omitempty,min=1"`
+	OverlapToks int `yaml:"overlapToks" validate:"omitempty,min=1"`
 }
 
 // loadConfigFiles reads configuration files and returns combined configuration.
@@ -134,6 +141,13 @@ func setServiceFromProfile(target *Profile, source *ConfigFileProfile) error {
 	}
 	if source.ContextSize > 0 {
 		target.ContextSize = source.ContextSize
+	}
+
+	if source.Indexing.ChunkToks > 0 {
+		target.Indexing.ChunkToks = source.Indexing.ChunkToks
+	}
+	if source.Indexing.OverlapToks > 0 {
+		target.Indexing.OverlapToks = source.Indexing.OverlapToks
 	}
 
 	return nil

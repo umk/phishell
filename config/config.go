@@ -31,6 +31,13 @@ type Profile struct {
 
 	Concurrency int `validate:"required,min=1"`
 	ContextSize int `validate:"required,min=2000"`
+
+	Indexing ProfileIndexing `validate:"dive"`
+}
+
+type ProfileIndexing struct {
+	ChunkToks   int `validate:"omitempty,min=1"`
+	OverlapToks int `validate:"omitempty,min=1"`
 }
 
 // Init reads configuration from flags, environment variables, and config files.
@@ -100,6 +107,11 @@ func Init() error {
 		profile := &Profile{
 			Profile:     id,
 			Concurrency: 1,
+
+			Indexing: ProfileIndexing{
+				ChunkToks:   1000,
+				OverlapToks: 200,
+			},
 		}
 		if err := setProfileFromFileProfileOrPreset(profile, p); err != nil {
 			return err
