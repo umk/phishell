@@ -2,13 +2,13 @@ package slicesx
 
 import "sync"
 
-type SlicesPool[T any] struct {
+type SlicePool[T any] struct {
 	p    sync.Pool
 	size int
 }
 
-func NewSlicesPool[T any](size int) *SlicesPool[T] {
-	return &SlicesPool[T]{
+func NewSlicePool[T any](size int) *SlicePool[T] {
+	return &SlicePool[T]{
 		p: sync.Pool{
 			New: func() any {
 				slice := make([]T, 0, size)
@@ -19,7 +19,7 @@ func NewSlicesPool[T any](size int) *SlicesPool[T] {
 	}
 }
 
-func (sp *SlicesPool[T]) Get(size int) *[]T {
+func (sp *SlicePool[T]) Get(size int) *[]T {
 	if size > sp.size {
 		s := make([]T, size)
 		return &s
@@ -30,7 +30,7 @@ func (sp *SlicesPool[T]) Get(size int) *[]T {
 	}
 }
 
-func (sp *SlicesPool[T]) Put(s *[]T) {
+func (sp *SlicePool[T]) Put(s *[]T) {
 	if cap(*s) == sp.size {
 		sp.p.Put(s)
 	}

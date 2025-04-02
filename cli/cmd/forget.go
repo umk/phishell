@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
+	"github.com/umk/phishell/db"
 	"github.com/umk/phishell/util/execx"
 )
 
@@ -15,6 +18,21 @@ func (c *ForgetCommand) Execute(ctx context.Context, args execx.Arguments) error
 		return ErrInvalidArgs
 	}
 
+	batchID, err := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+
+	b, ok := c.context.documents.batches[batchID]
+	if !ok {
+		return fmt.Errorf("no such batch with ID %d", batchID)
+	}
+
+	for _, v := range b.chunks {
+		db.DocumentDB.Delete(v)
+	}
+
+	fmt.Println("OK")
 	return nil
 }
 

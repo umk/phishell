@@ -58,9 +58,9 @@ func (v *Vectors) Add(vector Vector) ID {
 	}
 }
 
-func (v *Vectors) Delete(id ID) {
+func (v *Vectors) Delete(id ID) bool {
 	i, _ := slices.BinarySearchFunc(v.chunks, id, searchChunk)
-	v.chunks[i].delete(id)
+	return v.chunks[i].delete(id)
 }
 
 func (v *Vectors) Get(vectors []Vector, n int) []ID {
@@ -73,6 +73,94 @@ func (v *Vectors) Get(vectors []Vector, n int) []ID {
 	}
 
 	return ids
+}
+
+func (v *Vectors) Compact() {
+	var destIndex, destRecordIndex int
+	destChunk := v.chunks[destIndex]
+
+	// Compact records by iterating over all chunks and their records.
+	for _, srcChunk := range v.chunks {
+		for _, record := range srcChunk.records {
+			if record == nil {
+				continue
+			}
+
+			// When destination chunk is full, move to next and reset index.
+			if destRecordIndex == cap(destChunk.records) {
+				destIndex++
+				destChunk = v.chunks[destIndex]
+				destRecordIndex = 0
+			}
+
+			// Write the valid record to the destination.
+			destChunk.records[destRecordIndex] = record
+			// Set new baseID for the chunk when writing its first record.
+			if destRecordIndex == 0 {
+				destChunk.baseID = record.id
+			}
+			destRecordIndex++
+		}
+	}
+
+	v.currentChunk = destChunk
+
+	// Nil out chunks that are no longer used.
+	for i := destIndex + 1; i < len(v.chunks); i++ {
+		v.chunks[i] = nil
+	}
+	v.chunks = v.chunks[:destIndex+1]
+
+	// Clear trailing nil records from the destination chunk.
+	for i := destRecordIndex; i < len(destChunk.records); i++ {
+		destChunk.records[i] = nil
+	}
+	destChunk.records = destChunk.records[:destRecordIndex]
+}
+
+func (v *Vectors) Repack() *Vectors {
+	// Create a new Vectors instance to hold compacted records.
+	vectors := &Vectors{
+		chunkSize: v.chunkSize,
+		chunks:    make([]*vectorsChunk, 1, 32),
+	}
+
+	// Initialize the first destination chunk.
+	destChunk := &vectorsChunk{
+		records: make([]*chunkRecord, 0, v.chunkSize),
+	}
+	vectors.chunks[0] = destChunk
+
+	// Iterate over all existing chunks.
+	for _, srcChunk := range v.chunks {
+		// Iterate over all records in the current source chunk.
+		for _, record := range srcChunk.records {
+			if record == nil {
+				continue
+			}
+
+			// If the current destination chunk is full, allocate a new one.
+			if len(destChunk.records) == cap(destChunk.records) {
+				destChunk = &vectorsChunk{
+					records: make([]*chunkRecord, 0, v.chunkSize),
+				}
+				vectors.chunks = append(vectors.chunks, destChunk)
+			}
+			// Set the baseID for a chunk when inserting its first record.
+			if len(destChunk.records) == 0 {
+				destChunk.baseID = record.id
+			}
+
+			// Append the valid record.
+			destChunk.records = append(destChunk.records, record)
+		}
+	}
+
+	// Update the current chunk pointer.
+	vectors.currentChunk = destChunk
+
+	// Optionally: review memory usage / add logging if needed.
+	return vectors
 }
 
 func (v *Vectors) getHeaps(vectors []Vector, n int) <-chan maxDistanceHeap {
@@ -145,4 +233,8 @@ func reduceHeaps(in <-chan maxDistanceHeap, n int) maxDistanceHeap {
 	}()
 
 	return <-out
+}
+
+func searchChunk(c *vectorsChunk, id ID) int {
+	return int(id - c.baseID)
 }

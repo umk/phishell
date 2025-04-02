@@ -7,7 +7,7 @@ import "github.com/umk/phishell/util/slicesx"
 type maxDistanceHeap = slicesx.LimitHeap[*maxDistanceHeapItem]
 
 type maxDistanceHeapItem struct {
-	record     *record
+	record     *chunkRecord
 	similarity float64
 }
 

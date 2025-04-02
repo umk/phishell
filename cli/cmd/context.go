@@ -19,7 +19,7 @@ func NewContext(session *session.Session) *Context {
 
 		commands: make(map[string]Command),
 
-		documents: make(documentsContext),
+		documents: makeDocumentsContext(),
 	}
 
 	context.commands["attach"] = &AttachCommand{context: context}

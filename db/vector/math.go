@@ -9,7 +9,7 @@ import (
 
 const pooledVectorSize = 20_000
 
-var vectorsPool = slicesx.NewSlicesPool[float32](pooledVectorSize)
+var vectorsPool = slicesx.NewSlicePool[float32](pooledVectorSize)
 
 func cosineSimilarity(a, b []float32, normA, normB float64, tmp []float32) float64 {
 	simd.MulFloat32(a, b, tmp)

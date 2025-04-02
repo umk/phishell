@@ -4,27 +4,19 @@ import "slices"
 
 type vectorsChunk struct {
 	baseID  ID
-	records []*record
+	records []*chunkRecord
 }
 
-type record struct {
+type chunkRecord struct {
 	id     ID
 	vector Vector
 	norm   float64
 }
 
-func searchChunk(c *vectorsChunk, id ID) int {
-	return int(id - c.baseID)
-}
-
-func searchRecord(r *record, id ID) int {
-	return int(id - r.id)
-}
-
 func newChunk(baseID ID, chunkSize int) *vectorsChunk {
 	return &vectorsChunk{
 		baseID:  baseID,
-		records: make([]*record, 0, chunkSize),
+		records: make([]*chunkRecord, 0, chunkSize),
 	}
 }
 
@@ -37,7 +29,7 @@ func (vc *vectorsChunk) add(vector []float32) ID {
 
 	tmp := vectorsPool.Get(len(vector))
 
-	vc.records = append(vc.records, &record{
+	vc.records = append(vc.records, &chunkRecord{
 		id:     id,
 		vector: vector,
 		norm:   vectorNorm(vector, *tmp),
@@ -48,8 +40,14 @@ func (vc *vectorsChunk) add(vector []float32) ID {
 	return id
 }
 
-func (vc *vectorsChunk) delete(id ID) {
+func (vc *vectorsChunk) delete(id ID) bool {
 	if i, ok := slices.BinarySearchFunc(vc.records, id, searchRecord); ok {
 		vc.records[i] = nil
+		return true
 	}
+	return false
+}
+
+func searchRecord(r *chunkRecord, id ID) int {
+	return int(id - r.id)
 }

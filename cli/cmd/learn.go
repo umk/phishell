@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"github.com/umk/phishell/splitter"
 	"github.com/umk/phishell/util/execx"
 	"github.com/umk/phishell/util/fsx"
+	"github.com/umk/phishell/util/slicesx"
 )
 
 type LearnCommand struct {
@@ -54,6 +56,8 @@ func (c *LearnCommand) Execute(ctx context.Context, args execx.Arguments) error 
 		return err
 	}
 
+	paths = slicesx.Unique(paths)
+
 	currentCtx, cancel := context.WithCancel(ctx)
 
 	chunks := c.getChunks(currentCtx, paths)
@@ -69,11 +73,8 @@ func (c *LearnCommand) Execute(ctx context.Context, args execx.Arguments) error 
 		pendingRecords = append(pendingRecords, record.(db.Record[db.Document]))
 	}
 
-	var batch documentsBatch
-	for _, r := range pendingRecords {
-		r = db.DocumentDB.Add(r)
-		batch.chunks = append(batch.chunks, r.ID)
-	}
+	batchId := c.commitRecords(pendingRecords)
+	fmt.Printf("Created batch %d\n", batchId)
 
 	cancel()
 
@@ -162,6 +163,21 @@ func (c *LearnCommand) getRecords(ctx context.Context, chunks <-chan any) <-chan
 	}()
 
 	return records
+}
+
+func (c *LearnCommand) commitRecords(records []db.Record[db.Document]) int {
+	var batch documentsBatch
+	for _, r := range records {
+		r = db.DocumentDB.Add(r)
+		batch.chunks = append(batch.chunks, r.ID)
+	}
+
+	c.context.documents.currentID++
+	currentID := c.context.documents.currentID
+
+	c.context.documents.batches[currentID] = &batch
+
+	return currentID
 }
 
 func (c *LearnCommand) Usage() []string {
