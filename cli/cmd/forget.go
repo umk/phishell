@@ -28,9 +28,7 @@ func (c *ForgetCommand) Execute(ctx context.Context, args execx.Arguments) error
 		return fmt.Errorf("no such batch with ID %d", batchID)
 	}
 
-	for _, v := range b.chunks {
-		db.DocumentDB.Delete(v)
-	}
+	db.DocumentDB.DeleteBatch(b.chunks)
 
 	fmt.Println("OK")
 	return nil

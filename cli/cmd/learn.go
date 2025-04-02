@@ -166,9 +166,10 @@ func (c *LearnCommand) getRecords(ctx context.Context, chunks <-chan any) <-chan
 }
 
 func (c *LearnCommand) commitRecords(records []db.Record[db.Document]) int {
+	records = db.DocumentDB.AddBatch(records)
+
 	var batch documentsBatch
 	for _, r := range records {
-		r = db.DocumentDB.Add(r)
 		batch.chunks = append(batch.chunks, r.ID)
 	}
 
